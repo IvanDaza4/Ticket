@@ -157,10 +157,10 @@ export default function ReportsPage() {
     const avgResolutionTime =
       resolvedTickets.length > 0
         ? resolvedTickets.reduce((sum, t) => {
-            const created = new Date(t.created_at).getTime()
-            const resolved = new Date(t.resolved_at).getTime()
-            return sum + (resolved - created) / (1000 * 60 * 60) // hours
-          }, 0) / resolvedTickets.length
+          const created = new Date(t.created_at).getTime()
+          const resolved = new Date(t.resolved_at).getTime()
+          return sum + (resolved - created) / (1000 * 60 * 60) // hours
+        }, 0) / resolvedTickets.length
         : 0
 
     // SLA compliance
@@ -385,13 +385,12 @@ export default function ReportsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats?.slaCompliance || 0}%</div>
             <div
-              className={`flex items-center text-xs ${
-                (stats?.slaCompliance || 0) >= 90
-                  ? 'text-green-600'
-                  : (stats?.slaCompliance || 0) >= 70
+              className={`flex items-center text-xs ${(stats?.slaCompliance || 0) >= 90
+                ? 'text-green-600'
+                : (stats?.slaCompliance || 0) >= 70
                   ? 'text-yellow-600'
                   : 'text-red-600'
-              }`}
+                }`}
             >
               {(stats?.slaCompliance || 0) >= 90 ? (
                 <TrendingUp className="mr-1 h-3 w-3" />
@@ -422,11 +421,10 @@ export default function ReportsPage() {
               {[1, 2, 3, 4, 5].map((star) => (
                 <Star
                   key={star}
-                  className={`h-4 w-4 ${
-                    star <= (stats?.csatAverage || 0)
-                      ? 'fill-yellow-500 text-yellow-500'
-                      : 'text-gray-300'
-                  }`}
+                  className={`h-4 w-4 ${star <= (stats?.csatAverage || 0)
+                    ? 'fill-yellow-500 text-yellow-500'
+                    : 'text-gray-300'
+                    }`}
                 />
               ))}
             </div>
@@ -543,8 +541,7 @@ export default function ReportsPage() {
                     <XAxis dataKey="priority" />
                     <YAxis />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="count" fill="hsl(var(--chart-1))" radius={4} />
-                  </BarChart>
+                    <Bar dataKey="count" fill="var(--color-chart-1)" radius={4} />                  </BarChart>
                 </ChartContainer>
               </CardContent>
             </Card>
@@ -580,7 +577,7 @@ export default function ReportsPage() {
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Bar
                       dataKey="resolved"
-                      fill="hsl(var(--chart-2))"
+                      fill="var(--color-chart-2)"
                       radius={4}
                       name="Tickets Resueltos"
                     />
@@ -651,7 +648,7 @@ export default function ReportsPage() {
                     <ChartTooltip content={<ChartTooltipContent />} />
                     <Bar
                       dataKey="tickets"
-                      fill="hsl(var(--chart-1))"
+                      fill="var(--color-chart-3)"
                       radius={4}
                       name="Tickets"
                     />
@@ -682,13 +679,12 @@ export default function ReportsPage() {
                           <td className="p-3">{client.name}</td>
                           <td className="p-3 text-center">
                             <span
-                              className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
-                                client.plan === 'gold'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : client.plan === 'silver'
+                              className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${client.plan === 'gold'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : client.plan === 'silver'
                                   ? 'bg-slate-100 text-slate-800'
                                   : 'bg-amber-100 text-amber-800'
-                              }`}
+                                }`}
                             >
                               {client.plan.charAt(0).toUpperCase() +
                                 client.plan.slice(1)}
