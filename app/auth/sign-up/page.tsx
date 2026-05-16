@@ -62,16 +62,22 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-8">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 px-4 py-8 relative isolation-auto">
+      {/* Background decoration igual al Login */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+      </div>
+
+      <Card className="w-full max-w-md border-border/50 bg-card/80 backdrop-blur-sm shadow-2xl shadow-primary/5 animate-scale-in">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-blue-600 p-2 rounded-lg">
-                <Headset className="h-6 w-6 text-white" />
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="bg-gradient-to-br from-primary to-primary/70 p-2 rounded-lg shadow-lg shadow-primary/20 transition-transform duration-200 group-hover:scale-105">
+                <Headset className="h-6 w-6 text-primary-foreground" />
               </div>
-              <span className="text-2xl font-bold text-slate-900">NOVA</span>
-            </div>
+              <span className="text-2xl font-bold text-foreground">NOVA</span>
+            </Link>
           </div>
           <CardTitle className="text-2xl">Crear Cuenta</CardTitle>
           <CardDescription>
@@ -81,10 +87,11 @@ export default function SignUpPage() {
         <form onSubmit={handleSignUp}>
           <CardContent className="space-y-4">
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="animate-fade-in">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
+            
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">Nombre</Label>
@@ -95,6 +102,7 @@ export default function SignUpPage() {
                   onChange={(e) => setFirstName(e.target.value)}
                   required
                   disabled={loading}
+                  className="bg-input/50 border-border/50 focus:border-primary/50 transition-colors duration-200"
                 />
               </div>
               <div className="space-y-2">
@@ -106,9 +114,11 @@ export default function SignUpPage() {
                   onChange={(e) => setLastName(e.target.value)}
                   required
                   disabled={loading}
+                  className="bg-input/50 border-border/50 focus:border-primary/50 transition-colors duration-200"
                 />
               </div>
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="email">Correo Electrónico</Label>
               <Input
@@ -119,8 +129,10 @@ export default function SignUpPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
+                className="bg-input/50 border-border/50 focus:border-primary/50 transition-colors duration-200"
               />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña</Label>
               <Input
@@ -131,8 +143,10 @@ export default function SignUpPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
+                className="bg-input/50 border-border/50 focus:border-primary/50 transition-colors duration-200"
               />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
               <Input
@@ -143,11 +157,17 @@ export default function SignUpPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 disabled={loading}
+                className="bg-input/50 border-border/50 focus:border-primary/50 transition-colors duration-200"
               />
             </div>
           </CardContent>
+
           <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300" 
+              disabled={loading}
+            >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -157,13 +177,15 @@ export default function SignUpPage() {
                 'Crear Cuenta'
               )}
             </Button>
+            
             <p className="text-sm text-muted-foreground text-center">
               ¿Ya tienes cuenta?{' '}
-              <Link href="/auth/login" className="text-blue-600 hover:underline">
+              <Link href="/auth/login" className="text-primary hover:text-primary/80 hover:underline transition-colors duration-200">
                 Inicia sesión
               </Link>
             </p>
-            <Link href="/" className="text-sm text-muted-foreground hover:underline text-center">
+            
+            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 text-center">
               Volver al inicio
             </Link>
           </CardFooter>
