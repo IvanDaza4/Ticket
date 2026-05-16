@@ -13,7 +13,7 @@ export default function SignUpSuccessPage() {
               <div className="bg-blue-600 p-2 rounded-lg">
                 <Headset className="h-6 w-6 text-white" />
               </div>
-              <span className="text-2xl font-bold text-slate-900">Ingnala</span>
+              <span className="text-2xl font-bold text-slate-900">NOVA</span>
             </div>
           </div>
           <div className="flex justify-center mb-4">

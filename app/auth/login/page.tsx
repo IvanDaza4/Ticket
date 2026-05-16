@@ -64,7 +64,7 @@ function LoginForm() {
             <div className="bg-gradient-to-br from-primary to-primary/70 p-2 rounded-lg shadow-lg shadow-primary/20 transition-transform duration-200 group-hover:scale-105">
               <Headset className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold text-foreground">Ingnala</span>
+            <span className="text-2xl font-bold text-foreground"></span>
           </Link>
         </div>
         <CardTitle className="text-2xl">Iniciar Sesion</CardTitle>
@@ -145,7 +145,7 @@ function LoginFormFallback() {
             <div className="bg-gradient-to-br from-primary to-primary/70 p-2 rounded-lg shadow-lg shadow-primary/20">
               <Headset className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold text-foreground">Ingnala</span>
+            <span className="text-2xl font-bold text-foreground">NOVA</span>
           </div>
         </div>
         <CardTitle className="text-2xl">Iniciar Sesion</CardTitle>

@@ -1,4 +1,4 @@
-// Constants and configuration for Ingnala Support V2
+// Constants and configuration for NOVA Support V2
 
 export const TICKET_STATUS_LABELS: Record<string, string> = {
   open: 'Abierto',

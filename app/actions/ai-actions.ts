@@ -97,7 +97,7 @@ export async function getAISuggestions(ticketId: string, subject: string, descri
   try {
     const supabase = await createClient()
 
-    const systemPrompt = `Eres un asistente de soporte tecnico IT experto integrado en Ingnala Support.
+    const systemPrompt = `Eres un asistente de soporte tecnico IT experto integrado en NOVA Support.
 
 SISTEMAS PRINCIPALES:
 - ANDROMEDA: Sistema comercial (presupuestos, pedidos, facturacion, stock)

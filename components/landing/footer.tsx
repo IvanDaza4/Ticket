@@ -11,7 +11,7 @@ export function LandingFooter() {
               <div className="bg-sidebar-primary p-2 rounded-lg">
                 <Headset className="h-5 w-5 text-sidebar-primary-foreground" />
               </div>
-              <span className="text-xl font-bold">Ingnala</span>
+              <span className="text-xl font-bold">NOVA</span>
             </Link>
             <p className="text-sm text-sidebar-foreground/70">
               Soporte IT profesional para pequeñas y medianas empresas. Tu tranquilidad tecnológica.
@@ -51,7 +51,7 @@ export function LandingFooter() {
 
         <div className="border-t border-sidebar-border pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-sidebar-foreground/70">
-            © {new Date().getFullYear()} Ingnala Support. Todos los derechos reservados.
+            © {new Date().getFullYear()} NOVA Support. Todos los derechos reservados.
           </p>
           <div className="flex gap-4">
             <Link href="#" className="text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors">

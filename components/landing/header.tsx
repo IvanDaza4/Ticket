@@ -10,7 +10,7 @@ export function LandingHeader() {
           <div className="bg-gradient-to-br from-primary to-primary/70 p-2 rounded-lg shadow-lg shadow-primary/20 transition-transform duration-200 group-hover:scale-105">
             <Headset className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold text-foreground">Ingnala</span>
+          <span className="text-xl font-bold text-foreground">NOVA</span>
         </Link>
         
         <nav className="hidden md:flex items-center gap-6">

@@ -14,10 +14,10 @@ const spaceGrotesk = Space_Grotesk({
 })
 
 export const metadata: Metadata = {
-  title: 'Ingnala Support - Soporte IT para PyMEs',
+  title: 'NOVA Support - Soporte IT para PyMEs',
   description: 'Plataforma integral de soporte técnico para pequeñas y medianas empresas. Gestión de tickets, SLAs, base de conocimientos y más.',
   keywords: ['soporte IT', 'helpdesk', 'tickets', 'PyMEs', 'soporte técnico', 'SLA'],
-  generator: 'Ingnala Support V2',
+  generator: 'NOVA Support V2',
   icons: {
     icon: [
       {

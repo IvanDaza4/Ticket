@@ -1,4 +1,4 @@
-// Database types for Ingnala Support V2
+// Database types for NOVA Support V2
 
 export type UserRole = 'client' | 'technician' | 'admin'
 export type PlanTier = 'bronze' | 'silver' | 'gold'

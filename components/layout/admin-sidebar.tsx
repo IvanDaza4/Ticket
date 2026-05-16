@@ -144,7 +144,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
           <div className="bg-gradient-to-br from-primary to-primary/70 p-1.5 rounded-lg shadow-lg shadow-primary/20 transition-transform duration-200 group-hover:scale-105">
             <Headset className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="text-lg font-semibold text-sidebar-foreground">Ingnala</span>
+          <span className="text-lg font-semibold text-sidebar-foreground">NOVA</span>
         </Link>
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild>
@@ -159,7 +159,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                   <div className="bg-gradient-to-br from-primary to-primary/70 p-1.5 rounded-lg shadow-lg shadow-primary/20">
                     <Headset className="h-5 w-5 text-primary-foreground" />
                   </div>
-                  <span className="text-lg font-semibold text-sidebar-foreground">Ingnala</span>
+                  <span className="text-lg font-semibold text-sidebar-foreground">NOVA</span>
                 </Link>
               </div>
               <NavContent isMobile />
@@ -186,7 +186,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               <Headset className="h-5 w-5 text-primary-foreground" />
             </div>
             {!collapsed && (
-              <span className="text-lg font-semibold text-sidebar-foreground">Ingnala</span>
+              <span className="text-lg font-semibold text-sidebar-foreground">NOVA</span>
             )}
           </Link>
           <Button 
