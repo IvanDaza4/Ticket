@@ -1,6 +1,6 @@
 'use server'
 
-import { generateObject, embed } from 'ai'
+import { generateObject } from 'ai'
 
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
@@ -78,37 +78,9 @@ Analiza cuidadosamente el contexto y las palabras clave. Responde en español.`
 /**
  * Generates embedding for a ticket's content
  */
-export async function generateTicketEmbedding(ticketId: string, subject: string, description: string, resolutionNotes?: string) {
-  const content = `${subject}\n\n${description}${resolutionNotes ? `\n\nResolución: ${resolutionNotes}` : ''}`
-
-  try {
-    const { embedding } = await embed({
-      model: google.textEmbeddingModel('text-embedding-005'),
-      value: content,
-    })
-
-    const supabase = await createClient()
-
-    // Create content hash to avoid re-embedding
-    const contentHash = Buffer.from(content).toString('base64').slice(0, 64)
-
-    const { error } = await supabase
-      .from('ticket_embeddings')
-      .upsert({
-        ticket_id: ticketId,
-        embedding: embedding as unknown as string,
-        content_hash: contentHash,
-      }, {
-        onConflict: 'ticket_id',
-      })
-
-    if (error) throw error
-
-    return { success: true }
-  } catch (error) {
-    console.error('Error generating embedding:', error)
-    return { success: false, error }
-  }
+export async function learnFromResolvedTicket(ticketId: string) {
+  // Embedding deshabilitado - modelo no disponible en esta API key
+  return { success: true }
 }
 
 /**
@@ -117,72 +89,12 @@ export async function generateTicketEmbedding(ticketId: string, subject: string,
  */
 export async function getAISuggestions(ticketId: string, subject: string, description: string) {
   try {
-    // Generate embedding for the current ticket
-    const { embedding } = await embed({
-      model: google.textEmbeddingModel('text-embedding-005'),
-      value: `${subject}\n\n${description}`,
-    })
-
     const supabase = await createClient()
 
-    // Find similar resolved tickets using vector similarity
-    const { data: similarTickets, error: searchError } = await supabase
-      .rpc('find_similar_tickets', {
-        query_embedding: embedding as unknown as string,
-        match_threshold: 0.5,
-        match_count: 5,
-      })
-
-    if (searchError) {
-      console.error('Error finding similar tickets:', searchError)
-    }
-
-    // Find matching solution patterns
-    const { data: patterns } = await supabase
-      .rpc('find_solution_patterns', {
-        query_embedding: embedding as unknown as string,
-        match_count: 3,
-      })
-
-    // Build context from similar tickets
-    let context = ''
-    if (similarTickets && similarTickets.length > 0) {
-      context = `\n\nTICKETS SIMILARES RESUELTOS ANTERIORMENTE:\n`
-      similarTickets.forEach((ticket: any, index: number) => {
-        context += `\n--- Caso ${index + 1} (Similitud: ${Math.round(ticket.similarity * 100)}%) ---\n`
-        context += `Problema: ${ticket.subject}\n`
-        context += `Descripción: ${ticket.description?.slice(0, 200)}...\n`
-        context += `Solución aplicada: ${ticket.resolution_notes}\n`
-      })
-    }
-
-    // Add patterns context
-    if (patterns && patterns.length > 0) {
-      context += `\n\nPATRONES DE SOLUCIÓN CONOCIDOS:\n`
-      patterns.forEach((pattern: any, index: number) => {
-        context += `\n--- Patrón ${index + 1}: ${pattern.pattern_name} ---\n`
-        context += `${pattern.pattern_description}\n`
-        if (pattern.recommended_steps) {
-          context += `Pasos: ${pattern.recommended_steps.join(', ')}\n`
-        }
-      })
-    }
-
-    // Generate AI suggestion based on similar cases
     const result = await generateObject({
       model: google('gemini-2.0-flash'),
       schema: solutionSchema,
       system: `Eres un asistente de soporte tecnico IT experto integrado en Ingnala Support.
-
-CONTEXTO DE LAS EMPRESAS:
-- Damos soporte IT a cuatro empresas: Ingnala, Imas, RyF y Brisol
-- Servidores fisicos on-premise en cada empresa
-
-EQUIPO IT:
-- Ivan Daza (idaza@emprade.com.ar) - Soporte y configuracion tecnica
-- Julian Brizuela (jbrizuela@emprade.com.ar) - Soporte basico
-- Santiago Chapperon (schapperon@emprade.com.ar) - Jefe de IT
-- Isidoro Roitman (isiroit@emprade.com.ar) - Master tecnico
 
 SISTEMAS PRINCIPALES:
 - ANDROMEDA: Sistema comercial (presupuestos, pedidos, facturacion, stock)
@@ -191,7 +103,6 @@ SISTEMAS PRINCIPALES:
 PROBLEMAS FRECUENTES Y SOLUCIONES:
 
 1. ERROR ODBC EN TABLEROS EXCEL:
-- Los tableros Excel consultan directamente la base de datos
 - Solucion: instalar driver desde el servidor:
   1. Abrir explorador de archivos
   2. Ir a: \\\\andromeda\\Soporte\\INSTALADORES\\ODBC_TABLEROS
@@ -205,33 +116,28 @@ PROBLEMAS FRECUENTES Y SOLUCIONES:
   3. Reconectar la VPN
   4. Si persiste, contactar al equipo IT
 
-3. IMPRESORAS: Siempre derivar al equipo IT, no guiar al usuario.
-
-4. SOPORTE REMOTO: El equipo IT usa UltraViewer para acceso remoto.
+3. IMPRESORAS: Siempre derivar al equipo IT.
+4. SOPORTE REMOTO: El equipo IT usa UltraViewer.
 
 REGLAS:
-1. Responde en espanol
-2. Se conciso con pasos numerados
-3. Para impresoras y VPN persistente, SIEMPRE derivar al equipo IT
-4. No inventes informacion tecnica`,
+1. Responde en espanol con pasos numerados
+2. Para impresoras y VPN persistente, SIEMPRE derivar al equipo IT
+3. No inventes informacion tecnica`,
       prompt: `Analiza el siguiente ticket y sugiere una solucion practica.
 
 TICKET:
 Asunto: ${subject}
 Descripcion: ${description}
-${context}
 
-Si hay casos similares resueltos, aprende de ellos. Si no, usa el conocimiento de problemas frecuentes documentados.`,
+Usa el conocimiento de problemas frecuentes documentados para dar una solucion concreta.`,
     })
 
-
-    // Store suggestion in database for learning
-    const { data: suggestion, error: insertError } = await supabase
+    const { data: suggestion } = await supabase
       .from('ai_suggestions')
       .insert({
         ticket_id: ticketId,
         suggested_solution: result.object.suggestedSolution,
-        similar_tickets: similarTickets?.map((t: any) => t.ticket_id) || [],
+        similar_tickets: [],
         confidence_score: result.object.confidence,
       })
       .select()
@@ -240,8 +146,8 @@ Si hay casos similares resueltos, aprende de ellos. Si no, usa el conocimiento d
     return {
       success: true,
       suggestion: result.object,
-      similarTickets: similarTickets || [],
-      patterns: patterns || [],
+      similarTickets: [],
+      patterns: [],
       suggestionId: suggestion?.id,
     }
   } catch (error) {
