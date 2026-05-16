@@ -1,14 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateObject } from 'ai'
-import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
-import { google } from '@ai-sdk/google'
-
-const responseSchema = z.object({
-  answer: z.string(),
-  confidence: z.number().min(0).max(1),
-  suggestTicket: z.boolean(),
-})
 
 const MIN_RESOLVED_TICKETS = 3
 
@@ -95,20 +86,31 @@ REGLAS:
 4. Nunca inventes informacion tecnica especifica
 5. Se empatico y profesional
 6. Para impresoras y VPN persistente, SIEMPRE derivar al equipo IT
-7. Mencionar UltraViewer cuando el problema requiera acceso remoto`
+7. Mencionar UltraViewer cuando el problema requiera acceso remoto
 
-    const result = await generateObject({
-      model: google('gemini-2.0-flash'),
-      schema: responseSchema,
-      system: systemPrompt,
-      prompt: `Pregunta del usuario: ${question}
+Responde ÚNICAMENTE con JSON válido (sin markdown):
+{"answer":"string","confidence":0.0,"suggestTicket":false}`
 
-Responde de forma util y practica basandote en el conocimiento del sistema.`,
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: `Pregunta del usuario: ${question}` }],
+      }),
     })
 
+    if (!response.ok) throw new Error(`Anthropic API error: ${response.status}`)
+
+    const data = await response.json()
+    const text = data.content[0]?.text ?? ''
+    const parsed = JSON.parse(text.trim())
+
     return NextResponse.json({
-      answer: result.object.answer,
-      suggestTicket: result.object.suggestTicket,
+      answer: parsed.answer,
+      suggestTicket: parsed.suggestTicket ?? false,
     })
   } catch (error) {
     console.error('Error in AI assistant:', error)
