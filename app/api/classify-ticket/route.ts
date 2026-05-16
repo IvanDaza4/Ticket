@@ -1,5 +1,7 @@
 import { generateText, Output } from 'ai'
 import { z } from 'zod'
+import { google } from '@ai-sdk/google'
+
 
 const ticketClassificationSchema = z.object({
   urgency: z.enum(['low', 'medium', 'high', 'critical']).describe(
@@ -49,7 +51,7 @@ ${category ? `Categoría proporcionada: ${category}` : 'Categoría: No proporcio
 Analiza cuidadosamente el ticket y proporciona tu clasificación. Sé conservador: no escales a critical/high sin evidencia clara de impacto severo.`
 
     const { output } = await generateText({
-      model: 'openai/gpt-4o-mini',
+      model: google('gemini-2.0-flash'),
       output: Output.object({
         schema: ticketClassificationSchema,
       }),

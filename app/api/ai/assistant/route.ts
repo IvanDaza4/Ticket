@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateText, embed, Output } from 'ai'
+import { generateObject, embed } from 'ai'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { google } from '@ai-sdk/google'
+
 
 const responseSchema = z.object({
   answer: z.string(),
@@ -9,7 +11,7 @@ const responseSchema = z.object({
   suggestTicket: z.boolean(),
 })
 
-const MIN_RESOLVED_TICKETS = 10
+const MIN_RESOLVED_TICKETS = 3
 
 export async function POST(req: NextRequest) {
   try {
@@ -39,14 +41,14 @@ export async function POST(req: NextRequest) {
 
     // Generate embedding for the question to find similar resolved tickets
     const { embedding } = await embed({
-      model: 'openai/text-embedding-3-small',
+      model: google.textEmbeddingModel('text-embedding-004'),
       value: question,
     })
 
     // Find similar RESOLVED tickets only (the key change)
     const { data: similarTickets } = await supabase.rpc('find_similar_resolved_tickets', {
       query_embedding: embedding as unknown as string,
-      match_threshold: 0.6,
+      match_threshold: 0.5,
       match_count: 5,
     })
 
@@ -72,37 +74,60 @@ export async function POST(req: NextRequest) {
     }
 
     // Generate AI response
-    const systemPrompt = `Eres un asistente de soporte tecnico IT amigable y profesional para una plataforma de soporte de PyMEs llamada Ingnala Support.
+    const systemPrompt = `Eres un asistente de soporte tecnico IT experto integrado en Ingnala Support, una plataforma de soporte para PyMEs.
 
-Tu objetivo es ayudar a los usuarios a resolver sus problemas tecnicos de forma rapida y sencilla.
+Tu funcion principal es analizar las preguntas de los usuarios y construir respuestas completas combinando DOS fuentes de conocimiento:
+
+1. TU CONOCIMIENTO PROPIO: Tu base de conocimiento general sobre IT, redes, software, hardware, seguridad y sistemas empresariales.
+
+2. BASE DE CONOCIMIENTOS DEL SISTEMA: Los casos resueltos anteriormente en esta plataforma, que se te proporcionan como contexto cuando son relevantes.
+
+CONTEXTO DE LAS EMPRESAS:
+- Damos soporte IT a cuatro empresas: Ingnala, Imas, RyF y Brisol
+- El soporte es tanto presencial como remoto
+- Todas las empresas operan con servidores fisicos instalados en sitio (on-premise)
+- Los tecnicos de campo reportan inconvenientes unicamente por Gmail o WhatsApp
+
+EQUIPO IT:
+- Ivan Daza (idaza@emprade) - Soporte y configuracion tecnica
+- Julian Brizuela (jbrizuela@emprade.com.ar) - Soporte basico
+- Santiago Chapperon (schapperon@emprade.com.ar) - Jefe de IT, gestion de usuarios
+- Isidoro Roitman (isiroit@emprade.com.ar) - Master tecnico
+
+SISTEMAS PRINCIPALES:
+- ANDROMEDA: Sistema comercial. Cubre presupuestos, pedidos, facturacion, clientes, ventas, stock y comprobantes
+- SIGEX: Sistema operativo. Cubre logistica, IFCI (instalaciones fijas, mangueras, bombas), recargas de matafuegos, vencimientos, rutas de control y rutas de logistica
+
+VPN:
+- El proceso de alta de VPN requiere coordinacion entre el equipo:
+  1. Ivan o Julian crean el acceso VPN
+  2. Santiago crea el usuario en el sistema
+  3. Ivan o Julian asignan el usuario al acceso creado
+- Si un usuario reporta problemas de VPN, derivar siempre a Ivan o Julian como primer contacto
+
+COMO CONSTRUIR TU RESPUESTA:
+- Primero analiza si los casos similares del sistema aportan informacion util para esta consulta especifica
+- Combina esa informacion con tu conocimiento propio para dar la respuesta mas completa posible
+- Si los casos del sistema no son suficientemente relevantes, apoyate principalmente en tu conocimiento
+- Cuando el problema involucre ANDROMEDA o SIGEX y no tengas certeza, sugiere escalar al equipo IT
+- Si el problema no tiene solucion clara, sugiere crear un ticket para que el equipo lo atienda
 
 REGLAS:
 1. Responde siempre en espanol
 2. Se conciso pero completo
 3. Proporciona pasos claros y numerados cuando sea necesario
-4. Si hay casos similares resueltos, basa tu respuesta en ellos
-5. Si no estas seguro o el problema es complejo, sugiere crear un ticket
-6. Nunca inventes informacion tecnica especifica
-7. Se empatico y profesional
+4. Nunca inventes informacion tecnica especifica que no puedas verificar
+5. Se empatico y profesional
+6. Si el problema es urgente o afecta a varios usuarios, recomienda contactar directamente al equipo IT`
 
-AREAS DE CONOCIMIENTO:
-- Problemas de red y conectividad (VPN, WiFi, Internet)
-- Correo electronico y Microsoft 365
-- Problemas de hardware (impresoras, equipos lentos)
-- Software y aplicaciones empresariales
-- Seguridad y contrasenas
-- Almacenamiento y archivos compartidos
-
-IMPORTANTE: Solo tienes acceso a informacion de tickets que han sido RESUELTOS. No tienes acceso a tickets pendientes o en progreso.`
-
-    const result = await generateText({
-      model: 'openai/gpt-4o-mini',
+    const result = await generateObject({
+      model: google('gemini-2.0-flash'),
+      schema: responseSchema,
       system: systemPrompt,
       prompt: `Pregunta del usuario: ${question}
 ${context}
 
 Responde de forma util y practica. Si hay casos similares resueltos, aprende de ellos.`,
-      output: Output.object({ schema: responseSchema }),
     })
 
     return NextResponse.json({
@@ -112,7 +137,7 @@ Responde de forma util y practica. Si hay casos similares resueltos, aprende de 
     })
   } catch (error) {
     console.error('Error in AI assistant:', error)
-    
+
     // Fallback response
     return NextResponse.json({
       answer: 'Lo siento, estoy teniendo problemas para procesar tu consulta en este momento. Por favor, intenta de nuevo en unos momentos o crea un ticket de soporte para que un tecnico pueda ayudarte directamente.',

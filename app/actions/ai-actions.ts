@@ -1,8 +1,11 @@
 'use server'
 
-import { generateText, Output, embed } from 'ai'
+import {  generateObject, embed } from 'ai'
+
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { google } from '@ai-sdk/google'
+
 
 // Schema for ticket classification
 const classificationSchema = z.object({
@@ -47,10 +50,10 @@ CRITERIOS DE IMPACTO:
 Analiza cuidadosamente el contexto y las palabras clave. Responde en español.`
 
   try {
-    const result = await generateText({
-      model: 'openai/gpt-4o-mini',
+    const result = await generateObject({
+      model: google('gemini-2.0-flash'),
+      schema: classificationSchema,
       prompt,
-      output: Output.object({ schema: classificationSchema }),
     })
 
     return {
@@ -77,15 +80,15 @@ Analiza cuidadosamente el contexto y las palabras clave. Responde en español.`
  */
 export async function generateTicketEmbedding(ticketId: string, subject: string, description: string, resolutionNotes?: string) {
   const content = `${subject}\n\n${description}${resolutionNotes ? `\n\nResolución: ${resolutionNotes}` : ''}`
-  
+
   try {
     const { embedding } = await embed({
-      model: 'openai/text-embedding-3-small',
+      model: google.textEmbeddingModel('text-embedding-004'),
       value: content,
     })
 
     const supabase = await createClient()
-    
+
     // Create content hash to avoid re-embedding
     const contentHash = Buffer.from(content).toString('base64').slice(0, 64)
 
@@ -116,7 +119,7 @@ export async function getAISuggestions(ticketId: string, subject: string, descri
   try {
     // Generate embedding for the current ticket
     const { embedding } = await embed({
-      model: 'openai/text-embedding-3-small',
+      model: google.textEmbeddingModel('text-embedding-004'),
       value: `${subject}\n\n${description}`,
     })
 
@@ -126,7 +129,7 @@ export async function getAISuggestions(ticketId: string, subject: string, descri
     const { data: similarTickets, error: searchError } = await supabase
       .rpc('find_similar_tickets', {
         query_embedding: embedding as unknown as string,
-        match_threshold: 0.65,
+        match_threshold: 0.5,
         match_count: 5,
       })
 
@@ -177,10 +180,10 @@ Genera una sugerencia de solución detallada y práctica. Si hay casos similares
 
 Responde en español con pasos claros y accionables.`
 
-    const result = await generateText({
-      model: 'openai/gpt-4o-mini',
+    const result = await generateObject({
+      model: google('gemini-2.0-flash'),
+      schema: solutionSchema,
       prompt,
-      output: Output.object({ schema: solutionSchema }),
     })
 
     // Store suggestion in database for learning
@@ -274,7 +277,7 @@ export async function learnFromResolvedTicket(ticketId: string) {
     if (suggestion) {
       // Update usage count for patterns that were used
       const { embedding } = await embed({
-        model: 'openai/text-embedding-3-small',
+        model: google.textEmbeddingModel('text-embedding-004'),
         value: `${ticket.subject}\n\n${ticket.description}\n\nResolución: ${ticket.resolution_notes}`,
       })
 
@@ -291,7 +294,7 @@ export async function learnFromResolvedTicket(ticketId: string) {
           .update({
             usage_count: matchingPatterns[0].usage_count + 1,
             success_rate: Math.min(
-              (matchingPatterns[0].success_rate * matchingPatterns[0].usage_count + 100) / 
+              (matchingPatterns[0].success_rate * matchingPatterns[0].usage_count + 100) /
               (matchingPatterns[0].usage_count + 1),
               100
             ),
