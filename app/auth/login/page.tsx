@@ -37,7 +37,6 @@ function LoginForm() {
       return
     }
 
-    // Get user profile to determine redirect
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       const { data: profile } = await supabase
@@ -46,7 +45,6 @@ function LoginForm() {
         .eq('id', user.id)
         .single()
 
-      // Redirect based on role
       if (redirect) {
         router.push(redirect)
       } else if (profile?.role === 'admin' || profile?.role === 'technician') {
@@ -59,17 +57,17 @@ function LoginForm() {
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md border-border/50 bg-card/80 backdrop-blur-sm shadow-2xl shadow-primary/5 animate-scale-in">
       <CardHeader className="space-y-1 text-center">
         <div className="flex justify-center mb-4">
-          <div className="flex items-center gap-2">
-            <div className="bg-primary p-2 rounded-lg">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="bg-gradient-to-br from-primary to-primary/70 p-2 rounded-lg shadow-lg shadow-primary/20 transition-transform duration-200 group-hover:scale-105">
               <Headset className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-2xl font-bold text-foreground">Ingnala</span>
-          </div>
+          </Link>
         </div>
-        <CardTitle className="text-2xl">Iniciar Sesión</CardTitle>
+        <CardTitle className="text-2xl">Iniciar Sesion</CardTitle>
         <CardDescription>
           Ingresa tus credenciales para acceder al sistema
         </CardDescription>
@@ -77,12 +75,12 @@ function LoginForm() {
       <form onSubmit={handleLogin}>
         <CardContent className="space-y-4">
           {error && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="animate-fade-in">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
           <div className="space-y-2">
-            <Label htmlFor="email">Correo Electrónico</Label>
+            <Label htmlFor="email">Correo Electronico</Label>
             <Input
               id="email"
               type="email"
@@ -91,39 +89,45 @@ function LoginForm() {
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={loading}
+              className="bg-input/50 border-border/50 focus:border-primary/50 transition-colors duration-200"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Contraseña</Label>
+            <Label htmlFor="password">Contrasena</Label>
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder="********"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={loading}
+              className="bg-input/50 border-border/50 focus:border-primary/50 transition-colors duration-200"
             />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button 
+            type="submit" 
+            className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300" 
+            disabled={loading}
+          >
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Iniciando sesión...
+                Iniciando sesion...
               </>
             ) : (
-              'Iniciar Sesión'
+              'Iniciar Sesion'
             )}
           </Button>
           <p className="text-sm text-muted-foreground text-center">
-            ¿No tienes cuenta?{' '}
-            <Link href="/auth/sign-up" className="text-primary hover:underline">
-              Regístrate
+            No tienes cuenta?{' '}
+            <Link href="/auth/sign-up" className="text-primary hover:text-primary/80 hover:underline transition-colors duration-200">
+              Registrate
             </Link>
           </p>
-          <Link href="/" className="text-sm text-muted-foreground hover:underline text-center">
+          <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 text-center">
             Volver al inicio
           </Link>
         </CardFooter>
@@ -134,33 +138,33 @@ function LoginForm() {
 
 function LoginFormFallback() {
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md border-border/50 bg-card/80 backdrop-blur-sm shadow-2xl shadow-primary/5">
       <CardHeader className="space-y-1 text-center">
         <div className="flex justify-center mb-4">
           <div className="flex items-center gap-2">
-            <div className="bg-primary p-2 rounded-lg">
+            <div className="bg-gradient-to-br from-primary to-primary/70 p-2 rounded-lg shadow-lg shadow-primary/20">
               <Headset className="h-6 w-6 text-primary-foreground" />
             </div>
             <span className="text-2xl font-bold text-foreground">Ingnala</span>
           </div>
         </div>
-        <CardTitle className="text-2xl">Iniciar Sesión</CardTitle>
+        <CardTitle className="text-2xl">Iniciar Sesion</CardTitle>
         <CardDescription>
           Cargando...
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <div className="h-4 w-32 bg-muted rounded animate-pulse" />
-          <div className="h-10 w-full bg-muted rounded animate-pulse" />
+          <div className="h-4 w-32 bg-muted/50 rounded animate-pulse" />
+          <div className="h-10 w-full bg-muted/50 rounded animate-pulse" />
         </div>
         <div className="space-y-2">
-          <div className="h-4 w-24 bg-muted rounded animate-pulse" />
-          <div className="h-10 w-full bg-muted rounded animate-pulse" />
+          <div className="h-4 w-24 bg-muted/50 rounded animate-pulse" />
+          <div className="h-10 w-full bg-muted/50 rounded animate-pulse" />
         </div>
       </CardContent>
       <CardFooter>
-        <div className="h-10 w-full bg-muted rounded animate-pulse" />
+        <div className="h-10 w-full bg-muted/50 rounded animate-pulse" />
       </CardFooter>
     </Card>
   )
@@ -168,7 +172,12 @@ function LoginFormFallback() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 px-4">
+      {/* Background decoration */}
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+      </div>
       <Suspense fallback={<LoginFormFallback />}>
         <LoginForm />
       </Suspense>

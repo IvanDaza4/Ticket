@@ -79,11 +79,11 @@ export function AdminTicketComments({ ticketId, comments }: AdminTicketCommentsP
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'admin':
-        return 'bg-purple-100 text-purple-800'
+        return 'bg-purple-500/20 text-purple-300 border-purple-500/30'
       case 'technician':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-blue-500/20 text-blue-300 border-blue-500/30'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-primary/20 text-primary border-primary/30'
     }
   }
 
@@ -110,37 +110,37 @@ export function AdminTicketComments({ ticketId, comments }: AdminTicketCommentsP
           comments.map((comment) => (
             <div
               key={comment.id}
-              className={`flex gap-3 p-3 rounded-lg ${
+              className={`flex gap-3 p-4 rounded-lg border transition-all duration-200 ${
                 comment.is_internal 
-                  ? 'bg-amber-50 border border-amber-200' 
-                  : 'bg-muted/50'
+                  ? 'bg-amber-500/10 border-amber-500/30 hover:border-amber-500/50' 
+                  : 'bg-secondary/50 border-border/60 hover:border-border'
               }`}
             >
-              <Avatar className="h-8 w-8">
+              <Avatar className="h-9 w-9 ring-2 ring-border/50">
                 <AvatarImage src={comment.author?.avatar_url || ''} />
-                <AvatarFallback>
+                <AvatarFallback className="bg-primary/20 text-primary">
                   <User className="h-4 w-4" />
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-medium text-sm">
+                  <span className="font-semibold text-sm text-foreground">
                     {comment.author?.first_name} {comment.author?.last_name}
                   </span>
                   <Badge variant="secondary" className={getRoleColor(comment.author?.role)}>
                     {getRoleLabel(comment.author?.role)}
                   </Badge>
                   {comment.is_internal && (
-                    <Badge variant="outline" className="text-amber-700 border-amber-300">
+                    <Badge variant="outline" className="text-amber-400 border-amber-500/50 bg-amber-500/10">
                       <Lock className="h-3 w-3 mr-1" />
                       Interno
                     </Badge>
                   )}
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground ml-auto">
                     {formatDistanceToNow(comment.created_at)}
                   </span>
                 </div>
-                <p className="text-sm text-foreground mt-1 whitespace-pre-wrap">
+                <p className="text-sm text-foreground/90 mt-2 whitespace-pre-wrap leading-relaxed">
                   {comment.content}
                 </p>
               </div>
