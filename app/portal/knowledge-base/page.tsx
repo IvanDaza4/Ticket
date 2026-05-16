@@ -44,7 +44,7 @@ const SUGGESTED_QUESTIONS = [
   'Como comparto archivos con mi equipo?',
 ]
 
-const MIN_RESOLVED_TICKETS = 10
+const MIN_RESOLVED_TICKETS = 3
 
 export default function KnowledgeBasePage() {
   const [messages, setMessages] = useState<Message[]>([])

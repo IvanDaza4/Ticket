@@ -1,6 +1,6 @@
 'use server'
 
-import {  generateObject, embed } from 'ai'
+import { generateObject, embed } from 'ai'
 
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
@@ -169,22 +169,61 @@ export async function getAISuggestions(ticketId: string, subject: string, descri
     }
 
     // Generate AI suggestion based on similar cases
-    const prompt = `Eres un técnico experto en soporte IT. Analiza el siguiente ticket y sugiere una solución basada en tu conocimiento y los casos similares resueltos anteriormente.
-
-TICKET ACTUAL:
-Asunto: ${subject}
-Descripción: ${description}
-${context}
-
-Genera una sugerencia de solución detallada y práctica. Si hay casos similares, aprende de las soluciones que funcionaron. Si no hay casos similares, usa tu conocimiento general de IT.
-
-Responde en español con pasos claros y accionables.`
-
     const result = await generateObject({
       model: google('gemini-2.0-flash'),
       schema: solutionSchema,
-      prompt,
+      system: `Eres un asistente de soporte tecnico IT experto integrado en Ingnala Support.
+
+CONTEXTO DE LAS EMPRESAS:
+- Damos soporte IT a cuatro empresas: Ingnala, Imas, RyF y Brisol
+- Servidores fisicos on-premise en cada empresa
+
+EQUIPO IT:
+- Ivan Daza (idaza@emprade.com.ar) - Soporte y configuracion tecnica
+- Julian Brizuela (jbrizuela@emprade.com.ar) - Soporte basico
+- Santiago Chapperon (schapperon@emprade.com.ar) - Jefe de IT
+- Isidoro Roitman (isiroit@emprade.com.ar) - Master tecnico
+
+SISTEMAS PRINCIPALES:
+- ANDROMEDA: Sistema comercial (presupuestos, pedidos, facturacion, stock)
+- SIGEX: Sistema operativo (logistica, IFCI, matafuegos, rutas)
+
+PROBLEMAS FRECUENTES Y SOLUCIONES:
+
+1. ERROR ODBC EN TABLEROS EXCEL:
+- Los tableros Excel consultan directamente la base de datos
+- Solucion: instalar driver desde el servidor:
+  1. Abrir explorador de archivos
+  2. Ir a: \\\\andromeda\\Soporte\\INSTALADORES\\ODBC_TABLEROS
+  3. Ejecutar "msodbcsql" y seguir los pasos
+  4. Reiniciar Excel
+- Si persiste, contactar al equipo IT
+
+2. PROGRAMAS QUE NO ABREN CON VPN:
+  1. Verificar que la VPN este conectada
+  2. Reiniciar el programa
+  3. Reconectar la VPN
+  4. Si persiste, contactar al equipo IT
+
+3. IMPRESORAS: Siempre derivar al equipo IT, no guiar al usuario.
+
+4. SOPORTE REMOTO: El equipo IT usa UltraViewer para acceso remoto.
+
+REGLAS:
+1. Responde en espanol
+2. Se conciso con pasos numerados
+3. Para impresoras y VPN persistente, SIEMPRE derivar al equipo IT
+4. No inventes informacion tecnica`,
+      prompt: `Analiza el siguiente ticket y sugiere una solucion practica.
+
+TICKET:
+Asunto: ${subject}
+Descripcion: ${description}
+${context}
+
+Si hay casos similares resueltos, aprende de ellos. Si no, usa el conocimiento de problemas frecuentes documentados.`,
     })
+
 
     // Store suggestion in database for learning
     const { data: suggestion, error: insertError } = await supabase
