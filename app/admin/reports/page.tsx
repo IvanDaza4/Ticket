@@ -61,37 +61,38 @@ interface DashboardStats {
 const chartConfig = {
   created: {
     label: 'Creados',
-    color: 'hsl(var(--chart-1))',
+    color: 'var(--chart-1)),
   },
   resolved: {
     label: 'Resueltos',
-    color: 'hsl(var(--chart-2))',
+    color: 'var(--chart-2))',
   },
   open: {
     label: 'Abiertos',
-    color: 'hsl(var(--chart-1))',
+    color: 'var(--chart-1)',
   },
   in_progress: {
     label: 'En Progreso',
-    color: 'hsl(var(--chart-2))',
+    color: 'var(--chart-2)',
   },
   waiting: {
     label: 'En Espera',
-    color: 'hsl(var(--chart-3))',
+    color: 'var(--chart-3)',
   },
   closed: {
     label: 'Cerrados',
-    color: 'hsl(var(--chart-4))',
+    color: 'var(--chart-4)',
   },
 }
 
 const statusColors = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
-  'hsl(220 70% 50%)',
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
+  '220 70% 50%)',
+  'oklch(0.5 0.1 220)',
 ]
 
 export default function ReportsPage() {

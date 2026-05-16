@@ -128,10 +128,10 @@ export default function ContractsPage() {
   }
 
   return (
-    <div className="p-6 md:p-8 space-y-6">
+    <div className="p-6 md:p-8 space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Contratos</h1>
+          <h1 className="text-3xl font-bold tracking-tight"><span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Contratos</span></h1>
           <p className="text-muted-foreground">
             Gestiona los contratos de servicio con tus clientes
           </p>
