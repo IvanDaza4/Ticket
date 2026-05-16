@@ -63,8 +63,8 @@ function LoginForm() {
           <Link href="/" className="flex items-center gap-2 group">
             <div className="bg-gradient-to-br from-primary to-primary/70 p-2 rounded-lg shadow-lg shadow-primary/20 transition-transform duration-200 group-hover:scale-105">
               <Headset className="h-6 w-6 text-primary-foreground" />
-              <span className="text-2xl font-bold text-background">NOVA</span>
             </div>
+            <span className="text-2xl font-bold text-foreground">NOVA</span>
           </Link>
         </div>
         <CardTitle className="text-2xl">Iniciar Sesion</CardTitle>
@@ -107,9 +107,9 @@ function LoginForm() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
-          <Button
-            type="submit"
-            className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
+          <Button 
+            type="submit" 
+            className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300" 
             disabled={loading}
           >
             {loading ? (
