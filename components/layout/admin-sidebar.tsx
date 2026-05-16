@@ -61,7 +61,6 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
 
   const navigation = user.role === 'admin' ? adminNavigation : technicianNavigation
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileOpen(false)
   }, [pathname])
@@ -75,9 +74,8 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
 
   const NavContent = ({ isMobile = false }: { isMobile?: boolean }) => (
     <>
-      {/* Navigation */}
       <nav className={cn("flex-1 px-2 py-4 space-y-1 overflow-y-auto", isMobile && "px-4")}>
-        {navigation.map((item) => {
+        {navigation.map((item, index) => {
           const isActive = pathname === item.href || 
             (item.href !== '/admin' && pathname.startsWith(item.href))
           
@@ -86,26 +84,30 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               key={item.name}
               href={item.href}
               onClick={() => isMobile && setMobileOpen(false)}
+              style={{ animationDelay: `${index * 50}ms` }}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                "hover:translate-x-1",
                 isActive 
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground" 
+                  ? "bg-primary/20 text-primary border border-primary/30 shadow-sm shadow-primary/10" 
                   : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50",
-                isMobile && "py-3"
+                isMobile && "py-3 animate-slide-in-right"
               )}
             >
-              <item.icon className="h-5 w-5 flex-shrink-0" />
+              <item.icon className={cn(
+                "h-5 w-5 flex-shrink-0 transition-transform duration-200",
+                isActive && "scale-110"
+              )} />
               {(isMobile || !collapsed) && <span>{item.name}</span>}
             </Link>
           )
         })}
       </nav>
 
-      {/* User section */}
       <div className={cn("border-t border-sidebar-border p-4", isMobile && "mt-auto")}>
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-9 h-9 rounded-full bg-sidebar-primary/20 flex items-center justify-center">
-            <User className="h-5 w-5 text-sidebar-primary" />
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center border border-primary/20">
+            <User className="h-5 w-5 text-sidebar-foreground" />
           </div>
           {(isMobile || !collapsed) && (
             <div className="flex-1 min-w-0">
@@ -122,7 +124,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
           variant="ghost" 
           size="sm" 
           className={cn(
-            "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50",
+            "text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 transition-colors duration-200",
             (isMobile || !collapsed) ? "w-full justify-start" : "w-full justify-center px-0"
           )}
           onClick={handleLogout}
@@ -137,26 +139,25 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   return (
     <>
       {/* Mobile Header Bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-sidebar border-b border-sidebar-border flex items-center justify-between px-4 z-40">
-        <Link href="/admin" className="flex items-center gap-2">
-          <div className="bg-sidebar-primary p-1.5 rounded-lg">
-            <Headset className="h-5 w-5 text-sidebar-primary-foreground" />
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-sidebar/95 backdrop-blur-md border-b border-sidebar-border flex items-center justify-between px-4 z-40">
+        <Link href="/admin" className="flex items-center gap-2 group">
+          <div className="bg-gradient-to-br from-primary to-primary/70 p-1.5 rounded-lg shadow-lg shadow-primary/20 transition-transform duration-200 group-hover:scale-105">
+            <Headset className="h-5 w-5 text-primary-foreground" />
           </div>
           <span className="text-lg font-semibold text-sidebar-foreground">Ingnala</span>
         </Link>
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-sidebar-foreground">
+            <Button variant="ghost" size="icon" className="text-sidebar-foreground hover:bg-sidebar-accent/50">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-72 p-0 bg-sidebar border-sidebar-border">
+          <SheetContent side="left" className="w-72 p-0 bg-sidebar/95 backdrop-blur-md border-sidebar-border">
             <div className="flex flex-col h-full">
-              {/* Mobile Header */}
               <div className="flex items-center justify-between h-14 px-4 border-b border-sidebar-border">
                 <Link href="/admin" className="flex items-center gap-2">
-                  <div className="bg-sidebar-primary p-1.5 rounded-lg">
-                    <Headset className="h-5 w-5 text-sidebar-primary-foreground" />
+                  <div className="bg-gradient-to-br from-primary to-primary/70 p-1.5 rounded-lg shadow-lg shadow-primary/20">
+                    <Headset className="h-5 w-5 text-primary-foreground" />
                   </div>
                   <span className="text-lg font-semibold text-sidebar-foreground">Ingnala</span>
                 </Link>
@@ -169,22 +170,20 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
 
       {/* Desktop Sidebar */}
       <aside className={cn(
-        "hidden md:flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300 relative group",
+        "hidden md:flex flex-col bg-sidebar/95 backdrop-blur-md border-r border-sidebar-border transition-all duration-300 relative group",
         collapsed ? "w-16" : "w-64"
       )}>
-        {/* Expand hitbox when collapsed */}
         {collapsed && (
           <button
             onClick={() => setCollapsed(false)}
-            className="absolute inset-y-0 -right-3 w-6 z-50 cursor-pointer hover:bg-sidebar-accent/20 transition-colors"
+            className="absolute inset-y-0 -right-3 w-6 z-50 cursor-pointer hover:bg-primary/10 transition-colors duration-200"
             aria-label="Expandir menu"
           />
         )}
-        {/* Header */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
-          <Link href="/admin" className="flex items-center gap-2">
-            <div className="bg-sidebar-primary p-1.5 rounded-lg">
-              <Headset className="h-5 w-5 text-sidebar-primary-foreground" />
+          <Link href="/admin" className="flex items-center gap-2 group">
+            <div className="bg-gradient-to-br from-primary to-primary/70 p-1.5 rounded-lg shadow-lg shadow-primary/20 transition-transform duration-200 group-hover:scale-105">
+              <Headset className="h-5 w-5 text-primary-foreground" />
             </div>
             {!collapsed && (
               <span className="text-lg font-semibold text-sidebar-foreground">Ingnala</span>
@@ -193,7 +192,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-8 w-8 text-sidebar-foreground/70 hover:text-sidebar-foreground"
+            className="h-8 w-8 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200"
             onClick={() => setCollapsed(!collapsed)}
           >
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
