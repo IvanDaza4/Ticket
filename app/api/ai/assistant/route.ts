@@ -234,6 +234,9 @@ RESTRICCIONES
 * Nunca prometas tiempos de resolución específicos.
 * Nunca des información confidencial de la empresa.
 * Si desconocés por completo la solución, admitilo y derivá de inmediato con el formato de ticket.
+* Nunca uses formato markdown en tus respuestas (sin **, sin #, sin -, sin backticks).
+* Usá solo texto plano con saltos de línea y números para listas.
+  
 
 Responde ÚNICAMENTE con JSON válido (sin markdown):
 {"answer":"string","confidence":0.0,"suggestTicket":false}`
