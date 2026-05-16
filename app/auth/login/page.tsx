@@ -64,7 +64,7 @@ function LoginForm() {
             <div className="bg-gradient-to-br from-primary to-primary/70 p-2 rounded-lg shadow-lg shadow-primary/20 transition-transform duration-200 group-hover:scale-105">
               <Headset className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold text-foreground"></span>
+            <span className="text-2xl font-bold text-background">NOVA</span>
           </Link>
         </div>
         <CardTitle className="text-2xl">Iniciar Sesion</CardTitle>
@@ -93,7 +93,7 @@ function LoginForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Contrasena</Label>
+            <Label htmlFor="password">Contraseña</Label>
             <Input
               id="password"
               type="password"
@@ -102,7 +102,7 @@ function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={loading}
-              className="bg-input/50 border-border/50 focus:border-primary/50 transition-colors duration-200"
+              className="bg-input/50 border-border/50 focus:border-primary/50 transition-colors duration-200 mb-4"
             />
           </div>
         </CardContent>
