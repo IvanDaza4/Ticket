@@ -61,11 +61,11 @@ interface DashboardStats {
 const chartConfig = {
   created: {
     label: 'Creados',
-    color: 'var(--chart-1)),
+    color: 'var(--chart-1)',
   },
   resolved: {
     label: 'Resueltos',
-    color: 'var(--chart-2))',
+    color: 'var(--chart-2)',
   },
   open: {
     label: 'Abiertos',

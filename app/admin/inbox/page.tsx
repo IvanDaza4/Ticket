@@ -113,7 +113,7 @@ export default function AdminInboxPage() {
       {/* Header */}
       <div>
         <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground">
-          Bandeja de Entrada
+          Bandeja de <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Entrada</span>
         </h1>
         <p className="text-sm md:text-base text-muted-foreground">
           Todos los tickets activos ordenados por prioridad
