@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 
     // Generate embedding for the question to find similar resolved tickets
     const { embedding } = await embed({
-      model: google.textEmbeddingModel('text-embedding-004'),
+      model: google.textEmbeddingModel('text-embedding-005'),
       value: question,
     })
 

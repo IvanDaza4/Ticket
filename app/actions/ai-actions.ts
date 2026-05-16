@@ -83,7 +83,7 @@ export async function generateTicketEmbedding(ticketId: string, subject: string,
 
   try {
     const { embedding } = await embed({
-      model: google.textEmbeddingModel('text-embedding-004'),
+      model: google.textEmbeddingModel('text-embedding-005'),
       value: content,
     })
 
@@ -119,7 +119,7 @@ export async function getAISuggestions(ticketId: string, subject: string, descri
   try {
     // Generate embedding for the current ticket
     const { embedding } = await embed({
-      model: google.textEmbeddingModel('text-embedding-004'),
+      model: google.textEmbeddingModel('text-embedding-005'),
       value: `${subject}\n\n${description}`,
     })
 
@@ -316,7 +316,7 @@ export async function learnFromResolvedTicket(ticketId: string) {
     if (suggestion) {
       // Update usage count for patterns that were used
       const { embedding } = await embed({
-        model: google.textEmbeddingModel('text-embedding-004'),
+        model: google.textEmbeddingModel('text-embedding-005'),
         value: `${ticket.subject}\n\n${ticket.description}\n\nResolución: ${ticket.resolution_notes}`,
       })
 
