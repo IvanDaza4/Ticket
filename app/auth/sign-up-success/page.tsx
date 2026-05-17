@@ -5,7 +5,7 @@ import { CheckCircle, Headset, Mail } from 'lucide-react'
 
 export default function SignUpSuccessPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md text-center">
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-4">
