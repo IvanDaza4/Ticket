@@ -60,7 +60,7 @@ export default async function TicketsPage() {
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -76,7 +76,7 @@ export default async function TicketsPage() {
       </Card>
 
       {/* Tickets List */}
-      <Card>
+      <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
         <CardHeader>
           <CardTitle>Todos los Tickets</CardTitle>
           <CardDescription>

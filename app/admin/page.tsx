@@ -95,17 +95,17 @@ export default async function AdminDashboard() {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5">
           <CardHeader className="pb-2">
             <CardDescription>Total Tickets</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 flex-shrink-0">
                 <Ticket className="h-5 w-5 text-primary" />
               </div>
-              <span className="text-2xl font-bold">{stats.total}</span>
+              <span className="text-2xl sm:text-3xl font-bold">{stats.total}</span>
             </div>
           </CardContent>
         </Card>
@@ -114,11 +114,11 @@ export default async function AdminDashboard() {
             <CardDescription>Abiertos</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-blue-500/10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-500/10 flex-shrink-0">
                 <AlertCircle className="h-5 w-5 text-blue-500" />
               </div>
-              <span className="text-2xl font-bold">{stats.open}</span>
+              <span className="text-2xl sm:text-3xl font-bold">{stats.open}</span>
             </div>
           </CardContent>
         </Card>
@@ -127,11 +127,11 @@ export default async function AdminDashboard() {
             <CardDescription>En Progreso</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-amber-500/10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-amber-500/10 flex-shrink-0">
                 <Clock className="h-5 w-5 text-amber-500" />
               </div>
-              <span className="text-2xl font-bold">{stats.inProgress}</span>
+              <span className="text-2xl sm:text-3xl font-bold">{stats.inProgress}</span>
             </div>
           </CardContent>
         </Card>
@@ -140,11 +140,11 @@ export default async function AdminDashboard() {
             <CardDescription>En Espera</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-orange-500/10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-orange-500/10 flex-shrink-0">
                 <Clock className="h-5 w-5 text-orange-500" />
               </div>
-              <span className="text-2xl font-bold">{stats.waiting}</span>
+              <span className="text-2xl sm:text-3xl font-bold">{stats.waiting}</span>
             </div>
           </CardContent>
         </Card>
@@ -153,11 +153,11 @@ export default async function AdminDashboard() {
             <CardDescription>Clientes</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 flex-shrink-0">
                 <Building2 className="h-5 w-5 text-primary" />
               </div>
-              <span className="text-2xl font-bold">{orgCount || 0}</span>
+              <span className="text-2xl sm:text-3xl font-bold">{orgCount || 0}</span>
             </div>
           </CardContent>
         </Card>
@@ -166,11 +166,11 @@ export default async function AdminDashboard() {
             <CardDescription>Tecnicos</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-accent/10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-accent/10 flex-shrink-0">
                 <Users className="h-5 w-5 text-accent" />
               </div>
-              <span className="text-2xl font-bold">{techCount || 0}</span>
+              <span className="text-2xl sm:text-3xl font-bold">{techCount || 0}</span>
             </div>
           </CardContent>
         </Card>

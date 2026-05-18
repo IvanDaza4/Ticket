@@ -137,52 +137,71 @@ export default function AdminTicketsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5">
+          <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Total Tickets</CardTitle>
-            <Ticket className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Abiertos</CardTitle>
-            <Clock className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.open}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">SLA Incumplido</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {stats.slaBreach}
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Ticket className="h-5 w-5 text-primary" />
+              </div>
+              <span className="text-3xl font-bold">{stats.total}</span>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Resueltos Hoy</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:border-blue-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Abiertos</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {stats.resolvedToday}
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-blue-500/10">
+                <Clock className="h-5 w-5 text-blue-500" />
+              </div>
+              <span className="text-3xl font-bold">{stats.open}</span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:border-red-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-red-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">SLA Incumplido</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-red-500/10">
+                <AlertTriangle className="h-5 w-5 text-red-500" />
+              </div>
+              <span className="text-3xl font-bold text-red-500">
+                {stats.slaBreach}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:border-emerald-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Resueltos Hoy</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-emerald-500/10">
+                <CheckCircle className="h-5 w-5 text-emerald-500" />
+              </div>
+              <span className="text-3xl font-bold text-emerald-500">
+                {stats.resolvedToday}
+              </span>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters */}
-      <Card>
+      {/* Tickets Table */}
+      <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
         <CardHeader>
+          <CardTitle>Todos los Tickets</CardTitle>
+        </CardHeader>
+        <CardContent>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:flex-wrap">
             <div className="relative flex-1 min-w-[200px] max-w-sm">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -194,7 +213,7 @@ export default function AdminTicketsPage() {
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Estado" />
               </SelectTrigger>
               <SelectContent>
@@ -207,7 +226,7 @@ export default function AdminTicketsPage() {
               </SelectContent>
             </Select>
             <Select value={urgencyFilter} onValueChange={setUrgencyFilter}>
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="w-full sm:w-[150px]">
                 <SelectValue placeholder="Urgencia" />
               </SelectTrigger>
               <SelectContent>
@@ -220,8 +239,8 @@ export default function AdminTicketsPage() {
               </SelectContent>
             </Select>
           </div>
-        </CardHeader>
-        <CardContent>
+        </CardContent>
+      </Card>
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />

@@ -55,17 +55,17 @@ export default async function PortalDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5">
           <CardHeader className="pb-2">
             <CardDescription>Total Tickets</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 flex-shrink-0">
                 <Ticket className="h-5 w-5 text-primary" />
               </div>
-              <span className="text-3xl font-bold">{stats.total}</span>
+              <span className="text-2xl sm:text-3xl font-bold">{stats.total}</span>
             </div>
           </CardContent>
         </Card>
@@ -74,11 +74,11 @@ export default async function PortalDashboard() {
             <CardDescription>Abiertos</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-blue-500/10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-500/10 flex-shrink-0">
                 <AlertCircle className="h-5 w-5 text-blue-500" />
               </div>
-              <span className="text-3xl font-bold">{stats.open}</span>
+              <span className="text-2xl sm:text-3xl font-bold">{stats.open}</span>
             </div>
           </CardContent>
         </Card>
@@ -87,11 +87,11 @@ export default async function PortalDashboard() {
             <CardDescription>En Progreso</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-amber-500/10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-amber-500/10 flex-shrink-0">
                 <Loader2 className="h-5 w-5 text-amber-500" />
               </div>
-              <span className="text-3xl font-bold">{stats.inProgress}</span>
+              <span className="text-2xl sm:text-3xl font-bold">{stats.inProgress}</span>
             </div>
           </CardContent>
         </Card>
@@ -100,11 +100,11 @@ export default async function PortalDashboard() {
             <CardDescription>Resueltos</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-emerald-500/10">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-emerald-500/10 flex-shrink-0">
                 <CheckCircle className="h-5 w-5 text-emerald-500" />
               </div>
-              <span className="text-3xl font-bold">{stats.resolved}</span>
+              <span className="text-2xl sm:text-3xl font-bold">{stats.resolved}</span>
             </div>
           </CardContent>
         </Card>
