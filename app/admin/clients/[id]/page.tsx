@@ -57,6 +57,9 @@ const planColors: Record<PlanTier, string> = {
   gold: 'bg-yellow-100 text-yellow-800 border-yellow-200',
 }
 
+// Styles for editable fields to ensure visibility in dark theme
+const editableFieldClass = "bg-background border-2 border-border focus:border-primary text-foreground placeholder:text-muted-foreground"
+
 export default function ClientDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -92,7 +95,6 @@ export default function ClientDetailPage() {
   async function fetchData() {
     const orgId = params.id as string
 
-    // Fetch organization
     const { data: orgData, error: orgError } = await supabase
       .from('organizations')
       .select('*')
@@ -117,7 +119,6 @@ export default function ClientDetailPage() {
       notes: orgData.notes || '',
     })
 
-    // Fetch users
     const { data: usersData } = await supabase
       .from('profiles')
       .select('*')
@@ -126,7 +127,6 @@ export default function ClientDetailPage() {
 
     setUsers(usersData || [])
 
-    // Fetch contracts
     const { data: contractsData } = await supabase
       .from('contracts')
       .select('*')
@@ -135,7 +135,6 @@ export default function ClientDetailPage() {
 
     setContracts(contractsData || [])
 
-    // Fetch ticket count
     const { count } = await supabase
       .from('tickets')
       .select('*', { count: 'exact', head: true })
@@ -143,7 +142,6 @@ export default function ClientDetailPage() {
 
     setTicketCount(count || 0)
 
-    // Fetch all users without organization for adding
     const { data: unassignedUsers } = await supabase
       .from('profiles')
       .select('*')
@@ -312,6 +310,9 @@ export default function ClientDetailPage() {
               <CardTitle>Datos de la Organizacion</CardTitle>
               <CardDescription>
                 Informacion general y de contacto
+                {isEditing && (
+                  <span className="ml-2 text-primary font-medium">— Modo edición activo</span>
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -322,9 +323,11 @@ export default function ClientDetailPage() {
                     <Input
                       value={editData.name}
                       onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                      className={editableFieldClass}
+                      placeholder="Nombre comercial"
                     />
                   ) : (
-                    <p className="text-sm">{organization.name}</p>
+                    <p className="text-sm py-2">{organization.name}</p>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -333,9 +336,11 @@ export default function ClientDetailPage() {
                     <Input
                       value={editData.legal_name}
                       onChange={(e) => setEditData({ ...editData, legal_name: e.target.value })}
+                      className={editableFieldClass}
+                      placeholder="Razón social"
                     />
                   ) : (
-                    <p className="text-sm">{organization.legal_name || '-'}</p>
+                    <p className="text-sm py-2">{organization.legal_name || '-'}</p>
                   )}
                 </div>
               </div>
@@ -347,9 +352,11 @@ export default function ClientDetailPage() {
                     <Input
                       value={editData.tax_id}
                       onChange={(e) => setEditData({ ...editData, tax_id: e.target.value })}
+                      className={editableFieldClass}
+                      placeholder="CIF/NIF"
                     />
                   ) : (
-                    <p className="text-sm">{organization.tax_id || '-'}</p>
+                    <p className="text-sm py-2">{organization.tax_id || '-'}</p>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -359,7 +366,7 @@ export default function ClientDetailPage() {
                       value={editData.plan}
                       onValueChange={(value: PlanTier) => setEditData({ ...editData, plan: value })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className={editableFieldClass}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -388,9 +395,11 @@ export default function ClientDetailPage() {
                       type="email"
                       value={editData.email}
                       onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                      className={editableFieldClass}
+                      placeholder="correo@empresa.com"
                     />
                   ) : (
-                    <p className="text-sm">{organization.email || '-'}</p>
+                    <p className="text-sm py-2">{organization.email || '-'}</p>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -401,9 +410,11 @@ export default function ClientDetailPage() {
                     <Input
                       value={editData.phone}
                       onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                      className={editableFieldClass}
+                      placeholder="+54 11 1234-5678"
                     />
                   ) : (
-                    <p className="text-sm">{organization.phone || '-'}</p>
+                    <p className="text-sm py-2">{organization.phone || '-'}</p>
                   )}
                 </div>
               </div>
@@ -417,9 +428,11 @@ export default function ClientDetailPage() {
                     <Input
                       value={editData.address}
                       onChange={(e) => setEditData({ ...editData, address: e.target.value })}
+                      className={editableFieldClass}
+                      placeholder="Dirección"
                     />
                   ) : (
-                    <p className="text-sm">{organization.address || '-'}</p>
+                    <p className="text-sm py-2">{organization.address || '-'}</p>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -428,9 +441,11 @@ export default function ClientDetailPage() {
                     <Input
                       value={editData.city}
                       onChange={(e) => setEditData({ ...editData, city: e.target.value })}
+                      className={editableFieldClass}
+                      placeholder="Ciudad"
                     />
                   ) : (
-                    <p className="text-sm">{organization.city || '-'}</p>
+                    <p className="text-sm py-2">{organization.city || '-'}</p>
                   )}
                 </div>
               </div>
@@ -442,10 +457,11 @@ export default function ClientDetailPage() {
                     value={editData.notes}
                     onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
                     rows={3}
-                    className="resize-none"
+                    className={cn(editableFieldClass, "resize-none")}
+                    placeholder="Notas adicionales..."
                   />
                 ) : (
-                  <p className="text-sm whitespace-pre-wrap">{organization.notes || '-'}</p>
+                  <p className="text-sm whitespace-pre-wrap py-2">{organization.notes || '-'}</p>
                 )}
               </div>
             </CardContent>
@@ -626,4 +642,8 @@ export default function ClientDetailPage() {
       </Dialog>
     </div>
   )
+}
+
+function cn(...classes: (string | undefined | false)[]): string {
+  return classes.filter(Boolean).join(' ')
 }

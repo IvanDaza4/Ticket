@@ -66,14 +66,16 @@ export default function ContractDetailPage() {
   const [saving, setSaving] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+
+  // Use string state for numeric inputs to allow clearing zeros
   const [editData, setEditData] = useState({
     name: '',
     plan: 'bronze' as PlanTier,
     start_date: '',
     end_date: '',
-    monthly_hours: 0,
-    monthly_fee: 0,
-    hourly_rate: 0,
+    monthly_hours: '' as string,
+    monthly_fee: '' as string,
+    hourly_rate: '' as string,
     is_active: true,
   })
 
@@ -99,9 +101,9 @@ export default function ContractDetailPage() {
         plan: data.plan,
         start_date: data.start_date,
         end_date: data.end_date || '',
-        monthly_hours: data.monthly_hours || 0,
-        monthly_fee: data.monthly_fee || 0,
-        hourly_rate: data.hourly_rate || 0,
+        monthly_hours: data.monthly_hours != null ? String(data.monthly_hours) : '',
+        monthly_fee: data.monthly_fee != null ? String(data.monthly_fee) : '',
+        hourly_rate: data.hourly_rate != null ? String(data.hourly_rate) : '',
         is_active: data.is_active,
       })
     }
@@ -117,9 +119,9 @@ export default function ContractDetailPage() {
         plan: editData.plan,
         start_date: editData.start_date,
         end_date: editData.end_date || null,
-        monthly_hours: editData.monthly_hours,
-        monthly_fee: editData.monthly_fee,
-        hourly_rate: editData.hourly_rate,
+        monthly_hours: editData.monthly_hours === '' ? null : parseInt(editData.monthly_hours) || 0,
+        monthly_fee: editData.monthly_fee === '' ? null : parseFloat(editData.monthly_fee) || 0,
+        hourly_rate: editData.hourly_rate === '' ? null : parseFloat(editData.hourly_rate) || 0,
         is_active: editData.is_active,
       })
       .eq('id', params.id)
@@ -335,8 +337,10 @@ export default function ContractDetailPage() {
                 <Input
                   id="monthly_hours"
                   type="number"
+                  min="0"
                   value={editData.monthly_hours}
-                  onChange={(e) => setEditData({ ...editData, monthly_hours: parseInt(e.target.value) || 0 })}
+                  onChange={(e) => setEditData({ ...editData, monthly_hours: e.target.value })}
+                  placeholder="0"
                 />
               </div>
             </div>
@@ -366,9 +370,11 @@ export default function ContractDetailPage() {
                 <Input
                   id="monthly_fee"
                   type="number"
+                  min="0"
                   step="0.01"
                   value={editData.monthly_fee}
-                  onChange={(e) => setEditData({ ...editData, monthly_fee: parseFloat(e.target.value) || 0 })}
+                  onChange={(e) => setEditData({ ...editData, monthly_fee: e.target.value })}
+                  placeholder="0.00"
                 />
               </div>
               <div className="grid gap-2">
@@ -376,9 +382,11 @@ export default function ContractDetailPage() {
                 <Input
                   id="hourly_rate"
                   type="number"
+                  min="0"
                   step="0.01"
                   value={editData.hourly_rate}
-                  onChange={(e) => setEditData({ ...editData, hourly_rate: parseFloat(e.target.value) || 0 })}
+                  onChange={(e) => setEditData({ ...editData, hourly_rate: e.target.value })}
+                  placeholder="0.00"
                 />
               </div>
             </div>

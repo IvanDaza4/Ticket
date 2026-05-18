@@ -32,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
 import {
   Plus,
   Search,
@@ -43,6 +44,11 @@ import {
   Smartphone,
   Package,
   HardDrive,
+  MapPin,
+  Tag,
+  Calendar,
+  Hash,
+  Building2,
 } from 'lucide-react'
 import type { Asset, AssetType, AssetStatus, Organization } from '@/lib/types'
 
@@ -82,6 +88,19 @@ const statusLabels: Record<AssetStatus, string> = {
   disposed: 'Dado de baja',
 }
 
+function DetailRow({ icon, label, value }: { icon?: React.ReactNode; label: string; value?: string | null }) {
+  if (!value) return null
+  return (
+    <div className="flex items-start gap-3 py-2">
+      {icon && <span className="text-muted-foreground mt-0.5 flex-shrink-0">{icon}</span>}
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="text-sm font-medium text-foreground break-words">{value}</p>
+      </div>
+    </div>
+  )
+}
+
 export default function AssetsPage() {
   const [assets, setAssets] = useState<Asset[]>([])
   const [organizations, setOrganizations] = useState<Organization[]>([])
@@ -91,6 +110,8 @@ export default function AssetsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [orgFilter, setOrgFilter] = useState<string>('all')
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
+  const [isDetailOpen, setIsDetailOpen] = useState(false)
   const [newAsset, setNewAsset] = useState({
     name: '',
     asset_type: 'pc' as AssetType,
@@ -143,6 +164,11 @@ export default function AssetsPage() {
       })
       fetchData()
     }
+  }
+
+  function openDetail(asset: Asset) {
+    setSelectedAsset(asset)
+    setIsDetailOpen(true)
   }
 
   const filteredAssets = assets.filter((asset) => {
@@ -535,7 +561,11 @@ export default function AssetsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openDetail(asset)}
+                      >
                         Ver detalles
                       </Button>
                     </TableCell>
@@ -546,6 +576,113 @@ export default function AssetsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Asset Detail Dialog */}
+      <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+        <DialogContent className="sm:max-w-[520px]">
+          {selectedAsset && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                    {assetTypeIcons[selectedAsset.asset_type]}
+                  </div>
+                  <div>
+                    <DialogTitle className="text-left">{selectedAsset.name}</DialogTitle>
+                    <DialogDescription className="text-left">
+                      {assetTypeLabels[selectedAsset.asset_type]}
+                      {selectedAsset.manufacturer && selectedAsset.model && (
+                        <> · {selectedAsset.manufacturer} {selectedAsset.model}</>
+                      )}
+                    </DialogDescription>
+                  </div>
+                </div>
+              </DialogHeader>
+
+              <div className="space-y-4 py-2">
+                {/* Status + Org */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  <Badge variant="outline" className={statusColors[selectedAsset.status]}>
+                    {statusLabels[selectedAsset.status]}
+                  </Badge>
+                  <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <Building2 className="h-3.5 w-3.5" />
+                    {getOrgName(selectedAsset.organization_id)}
+                  </span>
+                </div>
+
+                <Separator />
+
+                {/* Details grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                  <DetailRow
+                    icon={<Tag className="h-3.5 w-3.5" />}
+                    label="Fabricante"
+                    value={selectedAsset.manufacturer}
+                  />
+                  <DetailRow
+                    icon={<Monitor className="h-3.5 w-3.5" />}
+                    label="Modelo"
+                    value={selectedAsset.model}
+                  />
+                  <DetailRow
+                    icon={<Hash className="h-3.5 w-3.5" />}
+                    label="Número de Serie"
+                    value={selectedAsset.serial_number}
+                  />
+                  <DetailRow
+                    icon={<Network className="h-3.5 w-3.5" />}
+                    label="Dirección IP"
+                    value={selectedAsset.ip_address}
+                  />
+                  <DetailRow
+                    icon={<MapPin className="h-3.5 w-3.5" />}
+                    label="Ubicación"
+                    value={selectedAsset.location}
+                  />
+                  <DetailRow
+                    icon={<Calendar className="h-3.5 w-3.5" />}
+                    label="Fecha de compra"
+                    value={selectedAsset.purchase_date
+                      ? new Date(selectedAsset.purchase_date).toLocaleDateString('es-ES')
+                      : undefined}
+                  />
+                  <DetailRow
+                    icon={<Calendar className="h-3.5 w-3.5" />}
+                    label="Garantía hasta"
+                    value={selectedAsset.warranty_expiry
+                      ? new Date(selectedAsset.warranty_expiry).toLocaleDateString('es-ES')
+                      : undefined}
+                  />
+                </div>
+
+                {selectedAsset.notes && (
+                  <>
+                    <Separator />
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">Notas</p>
+                      <p className="text-sm text-foreground whitespace-pre-wrap">{selectedAsset.notes}</p>
+                    </div>
+                  </>
+                )}
+
+                {/* Timestamps */}
+                <Separator />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Registrado: {new Date(selectedAsset.created_at).toLocaleDateString('es-ES')}</span>
+                  <span>Actualizado: {new Date(selectedAsset.updated_at).toLocaleDateString('es-ES')}</span>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsDetailOpen(false)}>
+                  Cerrar
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

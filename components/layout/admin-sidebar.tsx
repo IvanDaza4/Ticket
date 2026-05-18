@@ -170,16 +170,9 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
 
       {/* Desktop Sidebar */}
       <aside className={cn(
-        "hidden md:flex flex-col bg-sidebar/95 backdrop-blur-md border-r border-sidebar-border transition-all duration-300 relative group",
+        "hidden md:flex flex-col bg-sidebar/95 backdrop-blur-md border-r border-sidebar-border transition-all duration-300 relative",
         collapsed ? "w-16" : "w-64"
       )}>
-        {collapsed && (
-          <button
-            onClick={() => setCollapsed(false)}
-            className="absolute inset-y-0 -right-3 w-6 z-50 cursor-pointer hover:bg-primary/10 transition-colors duration-200"
-            aria-label="Expandir menu"
-          />
-        )}
         <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
           <Link href="/admin" className="flex items-center gap-2 group">
             <div className="bg-gradient-to-br from-primary to-primary/70 p-1.5 rounded-lg shadow-lg shadow-primary/20 transition-transform duration-200 group-hover:scale-105">
