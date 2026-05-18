@@ -241,6 +241,13 @@ export default function AdminTicketsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Tickets Table */}
+      <Card className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden">
+        <CardHeader>
+          <CardTitle>Todos los Tickets</CardTitle>
+        </CardHeader>
+        <CardContent>
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -256,7 +263,8 @@ export default function AdminTicketsPage() {
               </p>
             </div>
           ) : (
-            <Table>
+            <div className="overflow-x-auto -mx-4 sm:-mx-6">
+              <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[80px]">#</TableHead>
@@ -353,6 +361,7 @@ export default function AdminTicketsPage() {
                 ))}
               </TableBody>
             </Table>
+            </div>
           )}
         </CardContent>
       </Card>
