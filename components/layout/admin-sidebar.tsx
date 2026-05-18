@@ -170,8 +170,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
 
       {/* Desktop Sidebar */}
       <aside className={cn(
-        "hidden md:flex flex-col bg-sidebar/95 backdrop-blur-md border-r border-sidebar-border transition-all duration-300 relative",
-        collapsed ? "w-16" : "w-64"
+        "hidden md:flex flex-col fixed left-0 top-0 h-screen bg-sidebar/95 backdrop-blur-md border-r border-sidebar-border transition-all duration-300 z-50"
       )}>
         <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
           <Link href="/admin" className="flex items-center gap-2 group">

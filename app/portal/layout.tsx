@@ -34,7 +34,7 @@ export default async function PortalLayout({
           organization: (profile?.organization as { name: string } | null)?.name,
         }}
       />
-      <main className="flex-1 overflow-auto pt-14 md:pt-0 pb-6">
+       <main className="flex-1 ml-0 md:ml-64 overflow-auto pt-14 md:pt-0 pb-6">
         {children}
       </main>
     </div>
