@@ -170,7 +170,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
 
       {/* Desktop Sidebar */}
       <aside className={cn(
-        "hidden md:flex flex-col bg-sidebar/95 backdrop-blur-md border-r border-sidebar-border transition-all duration-300 relative group",
+        "hidden md:flex flex-col fixed left-0 top-0 h-screen bg-sidebar/95 backdrop-blur-md border-r border-sidebar-border transition-all duration-300 z-50",
         collapsed ? "w-16" : "w-64"
       )}>
         {collapsed && (

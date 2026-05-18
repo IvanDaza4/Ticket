@@ -60,6 +60,23 @@ export function TicketComments({ ticketId, comments: initialComments }: TicketCo
 
       setComments([...comments, comment])
       setNewComment('')
+      
+      // Auto-close ticket if it's resolved and client adds comment
+      const { data: ticket } = await supabase
+        .from('tickets')
+        .select('status')
+        .eq('id', ticketId)
+        .single()
+
+      if (ticket?.status === 'resolved') {
+        // Call auto-close endpoint
+        await fetch('/api/tickets/auto-close', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ticketId, action: 'comment' })
+        })
+      }
+      
       router.refresh()
     } catch (error) {
       console.error('Error adding comment:', error)

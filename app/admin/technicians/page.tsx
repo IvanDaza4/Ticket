@@ -33,6 +33,9 @@ export default function TechniciansPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isInviteOpen, setIsInviteOpen] = useState(false)
   const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteLoading, setInviteLoading] = useState(false)
+  const [inviteMessage, setInviteMessage] = useState('')
+  const [inviteError, setInviteError] = useState('')
   const supabase = createClient()
 
   useEffect(() => {
@@ -95,10 +98,37 @@ export default function TechniciansPage() {
   }
 
   async function inviteTechnician() {
-    // In a real app, you would send an invitation email here
-    // For now, we just show a success message
-    setIsInviteOpen(false)
-    setInviteEmail('')
+    if (!inviteEmail.trim()) return
+
+    setInviteLoading(true)
+    setInviteError('')
+    setInviteMessage('')
+
+    try {
+      const response = await fetch('/api/technician-invitations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: inviteEmail })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setInviteError(data.error || 'Failed to send invitation')
+      } else {
+        setInviteMessage(`Invitacion enviada a ${inviteEmail}. El tecnico tendra 7 dias para aceptarla.`)
+        setInviteEmail('')
+        setTimeout(() => {
+          setIsInviteOpen(false)
+          setInviteMessage('')
+        }, 2000)
+      }
+    } catch (error) {
+      setInviteError('Error sending invitation. Please try again.')
+      console.error('Error:', error)
+    } finally {
+      setInviteLoading(false)
+    }
   }
 
   const filteredTechs = technicians.filter(
@@ -138,10 +168,20 @@ export default function TechniciansPage() {
             <DialogHeader>
               <DialogTitle>Invitar Nuevo Tecnico</DialogTitle>
               <DialogDescription>
-                Envia una invitacion por email para unirse al equipo.
+                Envia una invitacion por email para unirse al equipo. Tendran 7 dias para aceptarla.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
+              {inviteMessage && (
+                <div className="p-3 rounded-lg bg-green-50 text-green-800 text-sm">
+                  {inviteMessage}
+                </div>
+              )}
+              {inviteError && (
+                <div className="p-3 rounded-lg bg-red-50 text-red-800 text-sm">
+                  {inviteError}
+                </div>
+              )}
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -150,15 +190,23 @@ export default function TechniciansPage() {
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="tecnico@ingnala.com"
+                  disabled={inviteLoading}
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsInviteOpen(false)}>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsInviteOpen(false)}
+                disabled={inviteLoading}
+              >
                 Cancelar
               </Button>
-              <Button onClick={inviteTechnician} disabled={!inviteEmail}>
-                Enviar Invitacion
+              <Button 
+                onClick={inviteTechnician} 
+                disabled={!inviteEmail || inviteLoading}
+              >
+                {inviteLoading ? 'Enviando...' : 'Enviar Invitacion'}
               </Button>
             </DialogFooter>
           </DialogContent>
