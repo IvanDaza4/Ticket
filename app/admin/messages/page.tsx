@@ -293,13 +293,22 @@ export default function MessagesPage() {
       scrollToBottom()
     }
 
-    // Mark as read
+    // Mark all unread messages as read
     if (currentUserId) {
+      // Update last_read_at for this conversation
       await supabase
         .from('internal_conversation_participants')
         .update({ last_read_at: new Date().toISOString() })
         .eq('conversation_id', conversationId)
         .eq('user_id', currentUserId)
+
+      // Mark messages from other users as read
+      await supabase
+        .from('internal_messages')
+        .update({ is_read: true })
+        .eq('conversation_id', conversationId)
+        .neq('sender_id', currentUserId)
+        .eq('is_read', false)
 
       // Update local unread count
       setConversations(prev => 

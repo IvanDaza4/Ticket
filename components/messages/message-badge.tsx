@@ -14,6 +14,7 @@ export function MessageBadge({ className }: MessageBadgeProps) {
 
   useEffect(() => {
     let userId: string | null = null
+    let subscription: any = null
 
     async function fetchUnreadCount() {
       const { data: { user } } = await supabase.auth.getUser()
@@ -41,6 +42,7 @@ export function MessageBadge({ className }: MessageBadgeProps) {
           .eq('conversation_id', p.conversation_id)
           .neq('sender_id', user.id)
           .gt('created_at', p.last_read_at || '1970-01-01')
+          .eq('is_read', false)
 
         total += count || 0
       }
@@ -50,11 +52,11 @@ export function MessageBadge({ className }: MessageBadgeProps) {
 
     fetchUnreadCount()
 
-    // Poll every 30 seconds
-    const interval = setInterval(fetchUnreadCount, 30000)
+    // Poll every 10 seconds to pick up read status changes
+    const interval = setInterval(fetchUnreadCount, 10000)
 
     // Real-time subscription for new messages
-    const channel = supabase
+    subscription = supabase
       .channel('unread-messages')
       .on(
         'postgres_changes',
@@ -67,11 +69,24 @@ export function MessageBadge({ className }: MessageBadgeProps) {
           fetchUnreadCount()
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'internal_conversation_participants'
+        },
+        () => {
+          fetchUnreadCount()
+        }
+      )
       .subscribe()
 
     return () => {
       clearInterval(interval)
-      supabase.removeChannel(channel)
+      if (subscription) {
+        supabase.removeChannel(subscription)
+      }
     }
   }, [supabase])
 
