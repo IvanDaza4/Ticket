@@ -206,7 +206,7 @@ export default function UsersPage() {
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl sm:text-3xl font-bold">
           <span className="text-foreground">Gestion de </span>
-          <span className="text-primary">Usuarios</span>
+          <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Contratos</span>
         </h1>
         <p className="text-muted-foreground">
           Administra los usuarios del sistema y sus roles
