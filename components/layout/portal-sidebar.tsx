@@ -8,7 +8,6 @@ import {
   PlusCircle, 
   Ticket, 
   Brain, 
-  Monitor, 
   User, 
   LogOut,
   Headset,
@@ -28,7 +27,6 @@ const navigation = [
   { name: 'Nuevo Ticket', href: '/portal/tickets/new', icon: PlusCircle },
   { name: 'Mis Tickets', href: '/portal/tickets', icon: Ticket },
   { name: 'Asistente IA', href: '/portal/knowledge-base', icon: Brain },
-  { name: 'Mis Activos', href: '/portal/assets', icon: Monitor },
   { name: 'Mi Perfil', href: '/portal/profile', icon: Settings },
 ]
 
