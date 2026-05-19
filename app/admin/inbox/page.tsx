@@ -207,114 +207,111 @@ export default function AdminInboxPage() {
             </div>
           ) : filteredTickets.length > 0 ? (
             <div className="space-y-2">
-              filteredTickets.map((ticket) => {
+              {filteredTickets.map((ticket) => {
                 const hasAccess = canAccessTicket(ticket)
-                const isAssignedToOther = ticket.assigned_to && ticket.assigned_to !== currentUserId && currentUserRole !== 'admin'
-                
-                const TicketContent = (
-                  <div 
-                    className={`flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-3 md:p-4 rounded-lg border transition-colors ${
-                      hasAccess 
-                        ? 'border-border hover:bg-muted/50 cursor-pointer' 
-                        : 'border-border/50 bg-muted/20 opacity-70 cursor-not-allowed'
-                    }`}
-                  >
-                    {/* SLA Indicator - horizontal on mobile, vertical on desktop */}
-                    <div className={`h-1 md:h-12 md:w-2 w-full rounded-full ${slaColors[ticket.slaStatus]}`} />
-                    
-                    {/* Ticket Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-1">
-                        <span className="text-xs md:text-sm font-mono text-muted-foreground">
-                          #{ticket.ticket_number}
-                        </span>
-                        <Badge className={`text-xs ${TICKET_STATUS_COLORS[ticket.status]}`}>
-                          {TICKET_STATUS_LABELS[ticket.status]}
-                        </Badge>
-                        <Badge variant="outline" className={`text-xs ${TICKET_URGENCY_COLORS[ticket.urgency]}`}>
-                          {TICKET_URGENCY_LABELS[ticket.urgency]}
-                        </Badge>
-                        <Badge variant="secondary" className="uppercase text-xs hidden sm:inline-flex">
-                          {ticket.support_level}
-                        </Badge>
-                        {ticket.is_sla_breached && (
-                          <Badge variant="destructive" className="flex items-center gap-1 text-xs">
-                            <AlertTriangle className="h-3 w-3" />
-                            SLA
-                          </Badge>
-                        )}
-                        {isAssignedToOther && (
-                          <Badge variant="outline" className="flex items-center gap-1 text-xs text-muted-foreground border-muted-foreground/30">
-                            <Lock className="h-3 w-3" />
-                            Asignado
-                          </Badge>
-                        )}
-                      </div>
-                      <h3 className="font-medium text-foreground line-clamp-1 text-sm md:text-base">
-                        {ticket.subject}
-                      </h3>
-                      <div className="flex flex-wrap items-center gap-x-3 md:gap-x-4 gap-y-1 text-xs text-muted-foreground mt-1">
-                        <span className="truncate max-w-[120px] md:max-w-none">{ticket.organization?.name}</span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {new Date(ticket.created_at).toLocaleDateString('es-ES', {
-                            day: 'numeric',
-                            month: 'short',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </span>
-                        <span className="hidden sm:inline">
-                          Por: {ticket.creator?.first_name} {ticket.creator?.last_name}
-                        </span>
-                      </div>
-                    </div>
+              const isAssignedToOther = ticket.assigned_to && ticket.assigned_to !== currentUserId && currentUserRole !== 'admin'
 
-                    {/* Assignment & Priority */}
-                    <div className="flex items-center justify-between md:justify-end gap-3 md:gap-4 pt-2 md:pt-0 border-t md:border-t-0 border-border/50">
-                      <div>
-                        {ticket.assignee ? (
-                          <div className="flex items-center gap-2">
-                            <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center ${
-                              ticket.assigned_to === currentUserId 
-                                ? 'bg-primary/20' 
-                                : 'bg-accent/20'
-                            }`}>
-                              <User className={`h-3.5 w-3.5 md:h-4 md:w-4 ${
-                                ticket.assigned_to === currentUserId 
-                                  ? 'text-primary' 
-                                  : 'text-accent'
-                              }`} />
-                            </div>
-                            <span className="text-xs md:text-sm hidden lg:inline">
-                              {ticket.assigned_to === currentUserId 
-                                ? 'Tu' 
-                                : ticket.assignee?.first_name}
-                            </span>
-                          </div>
-                        ) : (
-                          <Badge variant="outline" className="text-orange-600 border-orange-200 text-xs">
-                            Sin asignar
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="text-right min-w-[50px] md:min-w-[60px]">
-                        <p className="text-xs text-muted-foreground">Prioridad</p>
-                        <p className="text-lg md:text-xl font-bold">{ticket.priority_score}</p>
-                      </div>
-                    </div>
-                  </div>
-                )
+              const TicketContent = (
+              <div
+                className={`flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-3 md:p-4 rounded-lg border transition-colors ${hasAccess
+                    ? 'border-border hover:bg-muted/50 cursor-pointer'
+                    : 'border-border/50 bg-muted/20 opacity-70 cursor-not-allowed'
+                  }`}
+              >
+                {/* SLA Indicator - horizontal on mobile, vertical on desktop */}
+                <div className={`h-1 md:h-12 md:w-2 w-full rounded-full ${slaColors[ticket.slaStatus]}`} />
 
-                return hasAccess ? (
-                  <Link key={ticket.id} href={`/admin/tickets/${ticket.id}`}>
-                    {TicketContent}
-                  </Link>
-                ) : (
-                  <div key={ticket.id} title="Este ticket esta asignado a otro tecnico">
-                    {TicketContent}
+                {/* Ticket Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-1">
+                    <span className="text-xs md:text-sm font-mono text-muted-foreground">
+                      #{ticket.ticket_number}
+                    </span>
+                    <Badge className={`text-xs ${TICKET_STATUS_COLORS[ticket.status]}`}>
+                      {TICKET_STATUS_LABELS[ticket.status]}
+                    </Badge>
+                    <Badge variant="outline" className={`text-xs ${TICKET_URGENCY_COLORS[ticket.urgency]}`}>
+                      {TICKET_URGENCY_LABELS[ticket.urgency]}
+                    </Badge>
+                    <Badge variant="secondary" className="uppercase text-xs hidden sm:inline-flex">
+                      {ticket.support_level}
+                    </Badge>
+                    {ticket.is_sla_breached && (
+                      <Badge variant="destructive" className="flex items-center gap-1 text-xs">
+                        <AlertTriangle className="h-3 w-3" />
+                        SLA
+                      </Badge>
+                    )}
+                    {isAssignedToOther && (
+                      <Badge variant="outline" className="flex items-center gap-1 text-xs text-muted-foreground border-muted-foreground/30">
+                        <Lock className="h-3 w-3" />
+                        Asignado
+                      </Badge>
+                    )}
                   </div>
-                )
+                  <h3 className="font-medium text-foreground line-clamp-1 text-sm md:text-base">
+                    {ticket.subject}
+                  </h3>
+                  <div className="flex flex-wrap items-center gap-x-3 md:gap-x-4 gap-y-1 text-xs text-muted-foreground mt-1">
+                    <span className="truncate max-w-[120px] md:max-w-none">{ticket.organization?.name}</span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {new Date(ticket.created_at).toLocaleDateString('es-ES', {
+                        day: 'numeric',
+                        month: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                    <span className="hidden sm:inline">
+                      Por: {ticket.creator?.first_name} {ticket.creator?.last_name}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Assignment & Priority */}
+                <div className="flex items-center justify-between md:justify-end gap-3 md:gap-4 pt-2 md:pt-0 border-t md:border-t-0 border-border/50">
+                  <div>
+                    {ticket.assignee ? (
+                      <div className="flex items-center gap-2">
+                        <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center ${ticket.assigned_to === currentUserId
+                            ? 'bg-primary/20'
+                            : 'bg-accent/20'
+                          }`}>
+                          <User className={`h-3.5 w-3.5 md:h-4 md:w-4 ${ticket.assigned_to === currentUserId
+                              ? 'text-primary'
+                              : 'text-accent'
+                            }`} />
+                        </div>
+                        <span className="text-xs md:text-sm hidden lg:inline">
+                          {ticket.assigned_to === currentUserId
+                            ? 'Tu'
+                            : ticket.assignee?.first_name}
+                        </span>
+                      </div>
+                    ) : (
+                      <Badge variant="outline" className="text-orange-600 border-orange-200 text-xs">
+                        Sin asignar
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="text-right min-w-[50px] md:min-w-[60px]">
+                    <p className="text-xs text-muted-foreground">Prioridad</p>
+                    <p className="text-lg md:text-xl font-bold">{ticket.priority_score}</p>
+                  </div>
+                </div>
+              </div>
+              )
+
+              return hasAccess ? (
+              <Link key={ticket.id} href={`/admin/tickets/${ticket.id}`}>
+                {TicketContent}
+              </Link>
+              ) : (
+              <div key={ticket.id} title="Este ticket esta asignado a otro tecnico">
+                {TicketContent}
+              </div>
+              )
               })}
             </div>
           ) : (
