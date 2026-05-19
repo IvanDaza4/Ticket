@@ -7,8 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
-import { ArrowLeft, Mail, Phone, Briefcase, Calendar, TrendingUp } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, Briefcase, Calendar, TrendingUp, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import type { Profile } from '@/lib/types'
 
 interface TechnicianProfile extends Profile {
@@ -22,12 +23,15 @@ export default function TechnicianProfilePage({ params }: { params: Promise<{ id
   const [technician, setTechnician] = useState<TechnicianProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [technicianId, setTechnicianId] = useState<string | null>(null)
+  const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const { id } = await params
+        setTechnicianId(id)
 
         // Get technician profile
         const { data: profile, error: profileError } = await supabase
@@ -217,7 +221,12 @@ export default function TechnicianProfilePage({ params }: { params: Promise<{ id
             Asignar Tickets
           </Link>
         </Button>
-        <Button variant="outline" className="flex-1">
+        <Button 
+          variant="outline" 
+          className="flex-1"
+          onClick={() => router.push(`/admin/messages?userId=${technicianId}`)}
+        >
+          <MessageSquare className="h-4 w-4 mr-2" />
           Enviar Mensaje
         </Button>
       </div>
