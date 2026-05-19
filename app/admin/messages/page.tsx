@@ -155,8 +155,6 @@ export default function MessagesPage() {
         if (convError.code === '42P01') {
           setErrorMessage('Las tablas de mensajeria no estan configuradas.')
           setTablesExist(false)
-        } else if (convError.code === '42501') {
-          setErrorMessage('No tienes permisos para crear conversaciones.')
         } else {
           setErrorMessage(`Error al crear conversacion: ${convError.message}`)
         }
