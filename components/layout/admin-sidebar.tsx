@@ -3,13 +3,13 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { 
-  LayoutDashboard, 
-  Inbox, 
-  Ticket, 
-  Building2, 
-  FileText, 
-  Users, 
+import {
+  LayoutDashboard,
+  Inbox,
+  Ticket,
+  Building2,
+  FileText,
+  Users,
   BookOpen,
   Monitor,
   BarChart3,
@@ -19,18 +19,23 @@ import {
   ChevronRight,
   User,
   Menu,
-  UserCog
+  UserCog,
+  MessageSquare
+
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { MessageBadge } from '@/components/messages/message-badge'
+
 
 const adminNavigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Bandeja de Entrada', href: '/admin/inbox', icon: Inbox },
   { name: 'Tickets', href: '/admin/tickets', icon: Ticket },
+  { name: 'Mensajes', href: '/admin/messages', icon: MessageSquare, hasBadge: true },
   { name: 'Clientes', href: '/admin/clients', icon: Building2 },
   { name: 'Contratos', href: '/admin/contracts', icon: FileText },
   { name: 'Usuarios', href: '/admin/users', icon: UserCog },
@@ -44,6 +49,7 @@ const technicianNavigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Bandeja de Entrada', href: '/admin/inbox', icon: Inbox },
   { name: 'Tickets', href: '/admin/tickets', icon: Ticket },
+  { name: 'Mensajes', href: '/admin/messages', icon: MessageSquare, hasBadge: true },
   { name: 'Activos', href: '/admin/assets', icon: Monitor },
 ]
 
@@ -78,9 +84,9 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
     <>
       <nav className={cn("flex-1 px-2 py-4 space-y-1 overflow-y-auto", isMobile && "px-4")}>
         {navigation.map((item, index) => {
-          const isActive = pathname === item.href || 
+          const isActive = pathname === item.href ||
             (item.href !== '/admin' && pathname.startsWith(item.href))
-          
+
           return (
             <Link
               key={item.name}
@@ -88,18 +94,21 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               onClick={() => isMobile && setMobileOpen(false)}
               style={{ animationDelay: `${index * 50}ms` }}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                "relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                 "hover:translate-x-1",
-                isActive 
-                  ? "bg-primary/20 text-primary border border-primary/30 shadow-sm shadow-primary/10" 
+                isActive
+                  ? "bg-primary/20 text-primary border border-primary/30 shadow-sm shadow-primary/10"
                   : "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50",
                 isMobile && "py-3 animate-slide-in-right"
               )}
             >
-              <item.icon className={cn(
-                "h-5 w-5 flex-shrink-0 transition-transform duration-200",
-                isActive && "scale-110"
-              )} />
+              <div className="relative">
+                <item.icon className={cn(
+                  "h-5 w-5 flex-shrink-0 transition-transform duration-200",
+                  isActive && "scale-110"
+                )} />
+                {(item as any).hasBadge && <MessageBadge />}
+              </div>
               {(isMobile || !collapsed) && <span>{item.name}</span>}
             </Link>
           )
@@ -122,9 +131,9 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
             </div>
           )}
         </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           className={cn(
             "text-sidebar-foreground/70 hover:text-destructive hover:bg-destructive/10 transition-colors duration-200",
             (isMobile || !collapsed) ? "w-full justify-start" : "w-full justify-center px-0"
@@ -183,9 +192,9 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               <span className="text-lg font-semibold text-sidebar-foreground">NOVA</span>
             )}
           </Link>
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             className="h-8 w-8 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200"
             onClick={() => setCollapsed(!collapsed)}
           >

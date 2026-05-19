@@ -8,14 +8,15 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
 import { ArrowLeft, Clock, User, Calendar, MessageSquare, Loader2, CheckCircle2, PartyPopper } from 'lucide-react'
-import { 
-  TICKET_STATUS_LABELS, 
-  TICKET_STATUS_COLORS, 
-  TICKET_URGENCY_LABELS, 
+import {
+  TICKET_STATUS_LABELS,
+  TICKET_STATUS_COLORS,
+  TICKET_URGENCY_LABELS,
   TICKET_URGENCY_COLORS,
-  TICKET_IMPACT_LABELS 
+  TICKET_IMPACT_LABELS
 } from '@/lib/constants'
 import { TicketComments } from '@/components/tickets/ticket-comments'
+import { TicketFeedback } from '@/components/tickets/ticket-feedback'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -73,6 +74,8 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
   const [loading, setLoading] = useState(true)
   const [previousStatus, setPreviousStatus] = useState<string | null>(null)
   const [showResolvedAlert, setShowResolvedAlert] = useState(false)
+  const [showFeedback, setShowFeedback] = useState(false)
+  const [hasFeedback, setHasFeedback] = useState(false)
 
   const supabase = createClient()
 
@@ -92,11 +95,16 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
       // Check if status changed to resolved
       if (previousStatus && previousStatus !== 'resolved' && data.status === 'resolved') {
         setShowResolvedAlert(true)
+        setShowFeedback(true)
+      }
+      // Show feedback form if ticket is resolved and no feedback yet
+      if (data.status === 'resolved' && !hasFeedback) {
+        setShowFeedback(true)
       }
       setPreviousStatus(data.status)
       setTicket(data)
     }
-  }, [ticketId, previousStatus, supabase])
+  }, [ticketId, previousStatus, hasFeedback, supabase])
 
   const fetchComments = useCallback(async () => {
     const { data } = await supabase
@@ -114,13 +122,26 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
     }
   }, [ticketId, supabase])
 
+  const checkExistingFeedback = useCallback(async () => {
+    const { data } = await supabase
+      .from('ticket_feedback')
+      .select('id')
+      .eq('ticket_id', ticketId)
+      .single()
+
+    if (data) {
+      setHasFeedback(true)
+      setShowFeedback(false)
+    }
+  }, [ticketId, supabase])
+
   useEffect(() => {
     async function loadData() {
-      await Promise.all([fetchTicket(), fetchComments()])
+      await Promise.all([fetchTicket(), fetchComments(), checkExistingFeedback()])
       setLoading(false)
     }
     loadData()
-  }, [fetchTicket, fetchComments])
+  }, [fetchTicket, fetchComments, checkExistingFeedback])
 
   // Poll for updates every 30 seconds
   useEffect(() => {
@@ -184,7 +205,7 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
   const now = new Date()
   const responseDeadline = ticket.sla_response_deadline ? new Date(ticket.sla_response_deadline) : null
   const resolutionDeadline = ticket.sla_resolution_deadline ? new Date(ticket.sla_resolution_deadline) : null
-  
+
   const isResponseBreached = responseDeadline && !ticket.first_response_at && now > responseDeadline
   const isResolutionBreached = resolutionDeadline && !ticket.resolved_at && now > resolutionDeadline
 
@@ -199,7 +220,7 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
             </div>
             <AlertDialogTitle className="text-xl">Tu ticket ha sido resuelto</AlertDialogTitle>
             <AlertDialogDescription className="text-center">
-              El equipo de soporte ha marcado tu ticket <strong>#{ticket.ticket_number}</strong> como resuelto. 
+              El equipo de soporte ha marcado tu ticket <strong>#{ticket.ticket_number}</strong> como resuelto.
               {ticket.resolution_notes && (
                 <span className="block mt-2 p-3 bg-muted rounded-lg text-left text-sm">
                   <strong>Notas de resolucion:</strong><br />
@@ -262,6 +283,23 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
             </Card>
           )}
 
+          {/* Feedback Form - Show when ticket is resolved and no feedback yet */}
+          {showFeedback && ticket.status === 'resolved' && !hasFeedback && (
+            <TicketFeedback
+              ticketId={ticket.id}
+              ticketNumber={ticket.ticket_number}
+              onFeedbackSubmitted={() => {
+                setHasFeedback(true)
+                setShowFeedback(false)
+                fetchTicket()
+              }}
+              onClose={() => {
+                setShowFeedback(false)
+                fetchTicket()
+              }}
+            />
+          )}
+
           {/* Description */}
           <Card>
             <CardHeader>
@@ -286,9 +324,9 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <TicketComments 
-                ticketId={ticket.id} 
-                comments={comments} 
+              <TicketComments
+                ticketId={ticket.id}
+                comments={comments}
               />
             </CardContent>
           </Card>

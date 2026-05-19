@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,6 +15,8 @@ import { ArrowLeft, Loader2, Send, Sparkles, ImagePlus, X, AlertCircle } from 'l
 import Link from 'next/link'
 import { TICKET_CATEGORIES } from '@/lib/constants'
 import Image from 'next/image'
+import { ContractHoursAlert } from '@/components/contracts/contract-hours-alert'
+
 
 interface AttachedImage {
   id: string
@@ -28,18 +30,41 @@ export default function NewTicketPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [images, setImages] = useState<AttachedImage[]>([])
+  const [organizationId, setOrganizationId] = useState<string | null>(null)
+
   const [formData, setFormData] = useState({
     subject: '',
     description: '',
     category: '',
   })
 
+  const supabase = createClient()
+
+  // Fetch organization ID on mount
+  useEffect(() => {
+    async function fetchOrganization() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('organization_id')
+          .eq('id', user.id)
+          .single()
+
+        if (profile?.organization_id) {
+          setOrganizationId(profile.organization_id)
+        }
+      }
+    }
+    fetchOrganization()
+  }, [supabase])
+
   const handleImageAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
 
     const newImages: AttachedImage[] = []
-    
+
     Array.from(files).forEach(file => {
       if (file.type.startsWith('image/')) {
         const id = crypto.randomUUID()
@@ -49,7 +74,7 @@ export default function NewTicketPage() {
     })
 
     setImages(prev => [...prev, ...newImages])
-    
+
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -67,7 +92,7 @@ export default function NewTicketPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.subject.trim() || !formData.description.trim()) {
       setError('Por favor, completa el asunto y la descripción')
       return
@@ -137,7 +162,7 @@ export default function NewTicketPage() {
 
       // Calculate SLA deadlines
       const now = new Date()
-      const slaResponseDeadline = slaDefinition 
+      const slaResponseDeadline = slaDefinition
         ? new Date(now.getTime() + slaDefinition.response_time_minutes * 60000).toISOString()
         : null
       const slaResolutionDeadline = slaDefinition
@@ -146,7 +171,7 @@ export default function NewTicketPage() {
 
       // Upload images if any
       const attachments: { name: string; url: string; type: string }[] = []
-      
+
       for (const image of images) {
         const fileName = `${profile.organization_id}/${crypto.randomUUID()}-${image.file.name}`
         const { data: uploadData, error: uploadError } = await supabase.storage
@@ -157,7 +182,7 @@ export default function NewTicketPage() {
           const { data: urlData } = supabase.storage
             .from('ticket-attachments')
             .getPublicUrl(uploadData.path)
-          
+
           attachments.push({
             name: image.file.name,
             url: urlData.publicUrl,
@@ -218,7 +243,7 @@ export default function NewTicketPage() {
           subject: formData.subject,
           description: formData.description,
         }),
-      }).catch(() => {}) // Fire and forget
+      }).catch(() => { }) // Fire and forget
 
       // Clean up image previews
       images.forEach(img => URL.revokeObjectURL(img.preview))
@@ -260,7 +285,12 @@ export default function NewTicketPage() {
           Nuestro sistema utiliza <strong>Inteligencia Artificial</strong> para analizar y priorizar tu ticket automáticamente, asegurando una respuesta rápida y eficiente.
         </AlertDescription>
       </Alert>
-
+      
+       {/* Contract Hours Alert */}
+      {organizationId && (
+        <ContractHoursAlert organizationId={organizationId} />
+      )}
+      
       {/* Form */}
       <Card>
         <CardHeader>
@@ -343,7 +373,7 @@ export default function NewTicketPage() {
                   className="hidden"
                   id="image-upload"
                 />
-                
+
                 {images.length > 0 && (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
                     {images.map((img) => (
@@ -391,9 +421,9 @@ export default function NewTicketPage() {
               <Button type="button" variant="outline" asChild className="flex-1">
                 <Link href="/portal/tickets">Cancelar</Link>
               </Button>
-              <Button 
-                type="submit" 
-                disabled={loading || !isFormValid} 
+              <Button
+                type="submit"
+                disabled={loading || !isFormValid}
                 className="flex-1"
               >
                 {loading ? (
