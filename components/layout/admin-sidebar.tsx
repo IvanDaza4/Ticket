@@ -19,18 +19,21 @@ import {
   ChevronRight,
   User,
   Menu,
-  UserCog
+  UserCog,
+  MessageSquare
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { MessageBadge } from '@/components/messages/message-badge'
 
 const adminNavigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Bandeja de Entrada', href: '/admin/inbox', icon: Inbox },
   { name: 'Tickets', href: '/admin/tickets', icon: Ticket },
+  { name: 'Mensajes', href: '/admin/messages', icon: MessageSquare, hasBadge: true },
   { name: 'Usuarios', href: '/admin/users', icon: UserCog },
   { name: 'Clientes', href: '/admin/clients', icon: Building2 },
   { name: 'Contratos', href: '/admin/contracts', icon: FileText },
@@ -44,6 +47,7 @@ const technicianNavigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Bandeja de Entrada', href: '/admin/inbox', icon: Inbox },
   { name: 'Tickets', href: '/admin/tickets', icon: Ticket },
+  { name: 'Mensajes', href: '/admin/messages', icon: MessageSquare, hasBadge: true },
   { name: 'Activos', href: '/admin/assets', icon: Monitor },
 ]
 
@@ -88,7 +92,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
               onClick={() => isMobile && setMobileOpen(false)}
               style={{ animationDelay: `${index * 50}ms` }}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                "relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                 "hover:translate-x-1",
                 isActive 
                   ? "bg-primary/20 text-primary border border-primary/30 shadow-sm shadow-primary/10" 
@@ -96,10 +100,13 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                 isMobile && "py-3 animate-slide-in-right"
               )}
             >
-              <item.icon className={cn(
-                "h-5 w-5 flex-shrink-0 transition-transform duration-200",
-                isActive && "scale-110"
-              )} />
+              <div className="relative">
+                <item.icon className={cn(
+                  "h-5 w-5 flex-shrink-0 transition-transform duration-200",
+                  isActive && "scale-110"
+                )} />
+                {(item as any).hasBadge && <MessageBadge />}
+              </div>
               {(isMobile || !collapsed) && <span>{item.name}</span>}
             </Link>
           )

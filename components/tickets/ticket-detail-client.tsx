@@ -16,6 +16,7 @@ import {
   TICKET_IMPACT_LABELS 
 } from '@/lib/constants'
 import { TicketComments } from '@/components/tickets/ticket-comments'
+import { TicketFeedback } from '@/components/tickets/ticket-feedback'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -73,6 +74,8 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
   const [loading, setLoading] = useState(true)
   const [previousStatus, setPreviousStatus] = useState<string | null>(null)
   const [showResolvedAlert, setShowResolvedAlert] = useState(false)
+  const [showFeedback, setShowFeedback] = useState(false)
+  const [hasFeedback, setHasFeedback] = useState(false)
 
   const supabase = createClient()
 
@@ -92,11 +95,16 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
       // Check if status changed to resolved
       if (previousStatus && previousStatus !== 'resolved' && data.status === 'resolved') {
         setShowResolvedAlert(true)
+        setShowFeedback(true)
+      }
+      // Show feedback form if ticket is resolved and no feedback yet
+      if (data.status === 'resolved' && !hasFeedback) {
+        setShowFeedback(true)
       }
       setPreviousStatus(data.status)
       setTicket(data)
     }
-  }, [ticketId, previousStatus, supabase])
+  }, [ticketId, previousStatus, hasFeedback, supabase])
 
   const fetchComments = useCallback(async () => {
     const { data } = await supabase
@@ -114,13 +122,26 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
     }
   }, [ticketId, supabase])
 
+  const checkExistingFeedback = useCallback(async () => {
+    const { data } = await supabase
+      .from('ticket_feedback')
+      .select('id')
+      .eq('ticket_id', ticketId)
+      .single()
+
+    if (data) {
+      setHasFeedback(true)
+      setShowFeedback(false)
+    }
+  }, [ticketId, supabase])
+
   useEffect(() => {
     async function loadData() {
-      await Promise.all([fetchTicket(), fetchComments()])
+      await Promise.all([fetchTicket(), fetchComments(), checkExistingFeedback()])
       setLoading(false)
     }
     loadData()
-  }, [fetchTicket, fetchComments])
+  }, [fetchTicket, fetchComments, checkExistingFeedback])
 
   // Poll for updates every 30 seconds
   useEffect(() => {
@@ -260,6 +281,23 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
                 </p>
               </CardContent>
             </Card>
+          )}
+
+          {/* Feedback Form - Show when ticket is resolved and no feedback yet */}
+          {showFeedback && ticket.status === 'resolved' && !hasFeedback && (
+            <TicketFeedback
+              ticketId={ticket.id}
+              ticketNumber={ticket.ticket_number}
+              onFeedbackSubmitted={() => {
+                setHasFeedback(true)
+                setShowFeedback(false)
+                fetchTicket()
+              }}
+              onClose={() => {
+                setShowFeedback(false)
+                fetchTicket()
+              }}
+            />
           )}
 
           {/* Description */}

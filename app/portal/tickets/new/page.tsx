@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,6 +15,7 @@ import { ArrowLeft, Loader2, Send, Sparkles, ImagePlus, X, AlertCircle } from 'l
 import Link from 'next/link'
 import { TICKET_CATEGORIES } from '@/lib/constants'
 import Image from 'next/image'
+import { ContractHoursAlert } from '@/components/contracts/contract-hours-alert'
 
 interface AttachedImage {
   id: string
@@ -28,11 +29,33 @@ export default function NewTicketPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [images, setImages] = useState<AttachedImage[]>([])
+  const [organizationId, setOrganizationId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     subject: '',
     description: '',
     category: '',
   })
+
+  const supabase = createClient()
+
+  // Fetch organization ID on mount
+  useEffect(() => {
+    async function fetchOrganization() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('organization_id')
+          .eq('id', user.id)
+          .single()
+        
+        if (profile?.organization_id) {
+          setOrganizationId(profile.organization_id)
+        }
+      }
+    }
+    fetchOrganization()
+  }, [supabase])
 
   const handleImageAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -260,6 +283,11 @@ export default function NewTicketPage() {
           Nuestro sistema utiliza <strong>Inteligencia Artificial</strong> para analizar y priorizar tu ticket automáticamente, asegurando una respuesta rápida y eficiente.
         </AlertDescription>
       </Alert>
+
+      {/* Contract Hours Alert */}
+      {organizationId && (
+        <ContractHoursAlert organizationId={organizationId} />
+      )}
 
       {/* Form */}
       <Card>
