@@ -69,6 +69,8 @@ export default function MessagesPage() {
     const [availableUsers, setAvailableUsers] = useState<Profile[]>([])
     const [selectedUser, setSelectedUser] = useState<Profile | null>(null)
     const [creatingConversation, setCreatingConversation] = useState(false)
+    const [errorMessage, setErrorMessage] = useState<string | null>(null)
+    const [tablesExist, setTablesExist] = useState(true)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const supabase = createClient()
 
@@ -80,6 +82,7 @@ export default function MessagesPage() {
                 await fetchConversations(user.id)
                 await fetchAvailableUsers(user.id)
             }
+            setLoading(false)
         }
         init()
     }, [])
@@ -97,67 +100,105 @@ export default function MessagesPage() {
     }, [userIdParam, currentUserId, availableUsers, loading])
 
     async function handleStartConversationWithUser(user: Profile) {
-        if (!currentUserId) return
-
-        setCreatingConversation(true)
-
-        // Check if conversation already exists
-        const { data: existingParticipations } = await supabase
-            .from('internal_conversation_participants')
-            .select('conversation_id')
-            .eq('user_id', currentUserId)
-
-        if (existingParticipations) {
-            for (const p of existingParticipations) {
-                const { data: otherParticipant } = await supabase
-                    .from('internal_conversation_participants')
-                    .select('user_id')
-                    .eq('conversation_id', p.conversation_id)
-                    .eq('user_id', user.id)
-                    .single()
-
-                if (otherParticipant) {
-                    // Conversation exists, select it
-                    setSelectedConversation(p.conversation_id)
-                    await fetchMessages(p.conversation_id)
-                    setIsNewConversationOpen(false)
-                    setSelectedUser(null)
-                    setCreatingConversation(false)
-                    return
-                }
-            }
-        }
-
-        // Create new conversation
-        const { data: newConv, error: convError } = await supabase
-            .from('internal_conversations')
-            .insert({})
-            .select()
-            .single()
-
-        if (convError || !newConv) {
-            setCreatingConversation(false)
+        if (!currentUserId) {
             return
         }
 
-        // Add participants
-        await supabase
-            .from('internal_conversation_participants')
-            .insert([
-                { conversation_id: newConv.id, user_id: currentUserId },
-                { conversation_id: newConv.id, user_id: user.id }
-            ])
+        setCreatingConversation(true)
+        setErrorMessage(null)
 
-        setSelectedConversation(newConv.id)
-        await fetchConversations(currentUserId)
-        await fetchMessages(newConv.id)
-        setIsNewConversationOpen(false)
-        setSelectedUser(null)
-        setCreatingConversation(false)
+        try {
+            // Check if conversation already exists
+            const { data: existingParticipations, error: partError } = await supabase
+                .from('internal_conversation_participants')
+                .select('conversation_id')
+                .eq('user_id', currentUserId)
+
+            // Check if tables don't exist
+            if (partError?.code === '42P01') {
+                setErrorMessage('Las tablas de mensajeria no estan configuradas. Contacta al administrador.')
+                setTablesExist(false)
+                setCreatingConversation(false)
+                return
+            }
+
+            if (existingParticipations && existingParticipations.length > 0) {
+                for (const p of existingParticipations) {
+                    const { data: otherParticipant } = await supabase
+                        .from('internal_conversation_participants')
+                        .select('user_id')
+                        .eq('conversation_id', p.conversation_id)
+                        .eq('user_id', user.id)
+                        .single()
+
+                    if (otherParticipant) {
+                        // Conversation exists, select it
+                        setSelectedConversation(p.conversation_id)
+                        await fetchMessages(p.conversation_id)
+                        setIsNewConversationOpen(false)
+                        setSelectedUser(null)
+                        setCreatingConversation(false)
+                        return
+                    }
+                }
+            }
+
+            // Create new conversation
+            const { data: newConv, error: convError } = await supabase
+                .from('internal_conversations')
+                .insert({})
+                .select()
+                .single()
+
+            if (convError) {
+                if (convError.code === '42P01') {
+                    setErrorMessage('Las tablas de mensajeria no estan configuradas.')
+                    setTablesExist(false)
+                } else if (convError.code === '42501') {
+                    setErrorMessage('No tienes permisos para crear conversaciones.')
+                } else {
+                    setErrorMessage(`Error al crear conversacion: ${convError.message}`)
+                }
+                setCreatingConversation(false)
+                return
+            }
+
+            if (!newConv) {
+                setErrorMessage('No se pudo crear la conversacion.')
+                setCreatingConversation(false)
+                return
+            }
+
+            // Add participants
+            const { error: partInsertError } = await supabase
+                .from('internal_conversation_participants')
+                .insert([
+                    { conversation_id: newConv.id, user_id: currentUserId },
+                    { conversation_id: newConv.id, user_id: user.id }
+                ])
+
+            if (partInsertError) {
+                setErrorMessage(`Error al agregar participantes: ${partInsertError.message}`)
+                // Clean up the conversation we just created
+                await supabase.from('internal_conversations').delete().eq('id', newConv.id)
+                setCreatingConversation(false)
+                return
+            }
+
+            setSelectedConversation(newConv.id)
+            await fetchConversations(currentUserId)
+            await fetchMessages(newConv.id)
+            setIsNewConversationOpen(false)
+            setSelectedUser(null)
+        } catch (err) {
+            setErrorMessage('Error inesperado al crear la conversacion.')
+        } finally {
+            setCreatingConversation(false)
+        }
     }
 
     async function fetchConversations(userId: string) {
-        const { data: participations } = await supabase
+        const { data: participations, error: fetchError } = await supabase
             .from('internal_conversation_participants')
             .select(`
         conversation_id,
@@ -169,6 +210,12 @@ export default function MessagesPage() {
       `)
             .eq('user_id', userId)
             .order('conversation(updated_at)', { ascending: false })
+
+        if (fetchError?.code === '42P01') {
+            setTablesExist(false)
+            setLoading(false)
+            return
+        }
 
         if (!participations) {
             setLoading(false)
@@ -369,6 +416,17 @@ export default function MessagesPage() {
                 </p>
             </div>
 
+            {!tablesExist && (
+                <div className="mb-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 rounded-lg p-4">
+                    <h3 className="font-medium mb-1">Configuracion requerida</h3>
+                    <p className="text-sm">
+                        Las tablas de mensajeria no estan configuradas. Por favor ejecuta la migracion
+                        <code className="mx-1 px-1 bg-amber-100 dark:bg-amber-900 rounded">007_create_internal_messaging.sql</code>
+                        en tu base de datos Supabase.
+                    </p>
+                </div>
+            )}
+
             <div className="grid md:grid-cols-[320px,1fr] gap-4 h-[calc(100vh-200px)] min-h-[500px]">
                 {/* Conversations List */}
                 <Card className="flex flex-col">
@@ -547,7 +605,13 @@ export default function MessagesPage() {
             </div>
 
             {/* New Conversation Dialog */}
-            <Dialog open={isNewConversationOpen} onOpenChange={setIsNewConversationOpen}>
+            <Dialog open={isNewConversationOpen} onOpenChange={(open) => {
+                setIsNewConversationOpen(open)
+                if (!open) {
+                    setSelectedUser(null)
+                    setErrorMessage(null)
+                }
+            }}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Nueva Conversacion</DialogTitle>
@@ -555,6 +619,11 @@ export default function MessagesPage() {
                             Selecciona un tecnico o administrador para iniciar una conversacion
                         </DialogDescription>
                     </DialogHeader>
+                    {errorMessage && (
+                        <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg p-3 text-sm">
+                            {errorMessage}
+                        </div>
+                    )}
                     <div className="py-4">
                         <ScrollArea className="h-[300px] pr-4">
                             <div className="space-y-2">

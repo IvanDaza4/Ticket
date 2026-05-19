@@ -239,7 +239,7 @@ export default function UsersPage() {
         <CategoryCard
           category="unassigned"
           title="Sin Asignar"
-          description="Clientes sin tickets creados"
+          description="Usuarios sin asignar"
           icon={UserX}
           color="bg-amber-500/10 text-amber-500"
         />
