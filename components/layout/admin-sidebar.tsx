@@ -18,7 +18,8 @@ import {
   ChevronLeft,
   ChevronRight,
   User,
-  Menu
+  Menu,
+  UserCog
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
@@ -32,6 +33,7 @@ const adminNavigation = [
   { name: 'Tickets', href: '/admin/tickets', icon: Ticket },
   { name: 'Clientes', href: '/admin/clients', icon: Building2 },
   { name: 'Contratos', href: '/admin/contracts', icon: FileText },
+  { name: 'Usuarios', href: '/admin/users', icon: UserCog },
   { name: 'Tecnicos', href: '/admin/technicians', icon: Users },
   { name: 'Base de Conocimientos', href: '/admin/knowledge-base', icon: BookOpen },
   { name: 'Activos', href: '/admin/assets', icon: Monitor },
