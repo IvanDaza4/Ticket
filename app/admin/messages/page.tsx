@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -54,6 +55,9 @@ interface Conversation {
 }
 
 export default function MessagesPage() {
+  const searchParams = useSearchParams()
+  const userIdParam = searchParams.get('userId')
+  
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
@@ -65,6 +69,7 @@ export default function MessagesPage() {
   const [isNewConversationOpen, setIsNewConversationOpen] = useState(false)
   const [availableUsers, setAvailableUsers] = useState<Profile[]>([])
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null)
+  const [creatingConversation, setCreatingConversation] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
@@ -73,12 +78,84 @@ export default function MessagesPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         setCurrentUserId(user.id)
-        fetchConversations(user.id)
-        fetchAvailableUsers(user.id)
+        await fetchConversations(user.id)
+        await fetchAvailableUsers(user.id)
       }
     }
     init()
   }, [])
+
+  // Handle URL parameter to start conversation with specific user
+  useEffect(() => {
+    if (userIdParam && currentUserId && availableUsers.length > 0 && !loading) {
+      const userToMessage = availableUsers.find(u => u.id === userIdParam)
+      if (userToMessage) {
+        setSelectedUser(userToMessage)
+        // Auto-start conversation
+        handleStartConversationWithUser(userToMessage)
+      }
+    }
+  }, [userIdParam, currentUserId, availableUsers, loading])
+
+  async function handleStartConversationWithUser(user: Profile) {
+    if (!currentUserId) return
+    
+    setCreatingConversation(true)
+
+    // Check if conversation already exists
+    const { data: existingParticipations } = await supabase
+      .from('internal_conversation_participants')
+      .select('conversation_id')
+      .eq('user_id', currentUserId)
+
+    if (existingParticipations) {
+      for (const p of existingParticipations) {
+        const { data: otherParticipant } = await supabase
+          .from('internal_conversation_participants')
+          .select('user_id')
+          .eq('conversation_id', p.conversation_id)
+          .eq('user_id', user.id)
+          .single()
+
+        if (otherParticipant) {
+          // Conversation exists, select it
+          setSelectedConversation(p.conversation_id)
+          await fetchMessages(p.conversation_id)
+          setIsNewConversationOpen(false)
+          setSelectedUser(null)
+          setCreatingConversation(false)
+          return
+        }
+      }
+    }
+
+    // Create new conversation
+    const { data: newConv, error: convError } = await supabase
+      .from('internal_conversations')
+      .insert({})
+      .select()
+      .single()
+
+    if (convError || !newConv) {
+      setCreatingConversation(false)
+      return
+    }
+
+    // Add participants
+    await supabase
+      .from('internal_conversation_participants')
+      .insert([
+        { conversation_id: newConv.id, user_id: currentUserId },
+        { conversation_id: newConv.id, user_id: user.id }
+      ])
+
+    setSelectedConversation(newConv.id)
+    await fetchConversations(currentUserId)
+    await fetchMessages(newConv.id)
+    setIsNewConversationOpen(false)
+    setSelectedUser(null)
+    setCreatingConversation(false)
+  }
 
   async function fetchConversations(userId: string) {
     const { data: participations } = await supabase
@@ -227,55 +304,7 @@ export default function MessagesPage() {
 
   async function startNewConversation() {
     if (!selectedUser || !currentUserId) return
-
-    // Check if conversation already exists
-    const { data: existingParticipations } = await supabase
-      .from('internal_conversation_participants')
-      .select('conversation_id')
-      .eq('user_id', currentUserId)
-
-    if (existingParticipations) {
-      for (const p of existingParticipations) {
-        const { data: otherParticipant } = await supabase
-          .from('internal_conversation_participants')
-          .select('user_id')
-          .eq('conversation_id', p.conversation_id)
-          .eq('user_id', selectedUser.id)
-          .single()
-
-        if (otherParticipant) {
-          // Conversation exists, select it
-          setSelectedConversation(p.conversation_id)
-          fetchMessages(p.conversation_id)
-          setIsNewConversationOpen(false)
-          setSelectedUser(null)
-          return
-        }
-      }
-    }
-
-    // Create new conversation
-    const { data: newConv, error: convError } = await supabase
-      .from('internal_conversations')
-      .insert({})
-      .select()
-      .single()
-
-    if (convError || !newConv) return
-
-    // Add participants
-    await supabase
-      .from('internal_conversation_participants')
-      .insert([
-        { conversation_id: newConv.id, user_id: currentUserId },
-        { conversation_id: newConv.id, user_id: selectedUser.id }
-      ])
-
-    setSelectedConversation(newConv.id)
-    fetchConversations(currentUserId)
-    fetchMessages(newConv.id)
-    setIsNewConversationOpen(false)
-    setSelectedUser(null)
+    await handleStartConversationWithUser(selectedUser)
   }
 
   // Real-time subscription
@@ -561,11 +590,24 @@ export default function MessagesPage() {
             </ScrollArea>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsNewConversationOpen(false)}>
+            <Button variant="outline" onClick={() => {
+              setIsNewConversationOpen(false)
+              setSelectedUser(null)
+            }}>
               Cancelar
             </Button>
-            <Button onClick={startNewConversation} disabled={!selectedUser}>
-              Iniciar Conversacion
+            <Button 
+              onClick={startNewConversation} 
+              disabled={!selectedUser || creatingConversation}
+            >
+              {creatingConversation ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Iniciando...
+                </>
+              ) : (
+                'Iniciar Conversacion'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

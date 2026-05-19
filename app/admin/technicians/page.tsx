@@ -17,7 +17,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Plus, Search, Users, Wrench, Star, Ticket } from 'lucide-react'
+import { Plus, Search, Users, Wrench, Star, Ticket, MessageSquare } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import type { Profile } from '@/lib/types'
 
 interface TechnicianWithStats extends Profile {
@@ -28,6 +29,7 @@ interface TechnicianWithStats extends Profile {
 }
 
 export default function TechniciansPage() {
+  const router = useRouter()
   const [technicians, setTechnicians] = useState<TechnicianWithStats[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -366,7 +368,7 @@ export default function TechniciansPage() {
                     variant="outline" 
                     size="sm" 
                     className="flex-1"
-                    onClick={() => window.location.href = `/admin/technicians/${tech.id}`}
+                    onClick={() => router.push(`/admin/technicians/${tech.id}`)}
                   >
                     Ver Perfil
                   </Button>
@@ -374,9 +376,10 @@ export default function TechniciansPage() {
                     variant="outline" 
                     size="sm" 
                     className="flex-1"
-                    onClick={() => window.location.href = `/admin/inbox?assign=${tech.id}`}
+                    onClick={() => router.push(`/admin/messages?userId=${tech.id}`)}
                   >
-                    Asignar Tickets
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    Mensaje
                   </Button>
                 </div>
               </CardContent>
