@@ -27,7 +27,7 @@ import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { MessageBadge } from '@/components/messages/message-badge'
 
 
@@ -164,6 +164,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-72 p-0 bg-sidebar/95 backdrop-blur-md border-sidebar-border">
+            <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
             <div className="flex flex-col h-full">
               <div className="flex items-center justify-between h-14 px-4 border-b border-sidebar-border">
                 <Link href="/admin" className="flex items-center gap-2">
