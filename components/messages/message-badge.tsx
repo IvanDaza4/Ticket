@@ -33,21 +33,17 @@ export function MessageBadge({ className }: MessageBadgeProps) {
         return
       }
 
-      let total = 0
+      // Collect all conversation IDs for a single batch query
+      const convIds = participations.map(p => p.conversation_id)
 
-      for (const p of participations) {
-        const { count } = await supabase
-          .from('internal_messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('conversation_id', p.conversation_id)
-          .neq('sender_id', user.id)
-          .gt('created_at', p.last_read_at || '1970-01-01')
-          .eq('is_read', false)
+      const { count: total } = await supabase
+        .from('internal_messages')
+        .select('*', { count: 'exact', head: true })
+        .in('conversation_id', convIds)
+        .neq('sender_id', user.id)
+        .eq('is_read', false)
 
-        total += count || 0
-      }
-
-      setUnreadCount(total)
+      setUnreadCount(total || 0)
     }
 
     fetchUnreadCount()
@@ -55,30 +51,18 @@ export function MessageBadge({ className }: MessageBadgeProps) {
     // Poll every 10 seconds to pick up read status changes
     const interval = setInterval(fetchUnreadCount, 10000)
 
-    // Real-time subscription for new messages
+    // Real-time: react to new messages AND to messages being marked as read
     subscription = supabase
       .channel('unread-messages')
       .on(
         'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'internal_messages'
-        },
-        () => {
-          fetchUnreadCount()
-        }
+        { event: 'INSERT', schema: 'public', table: 'internal_messages' },
+        () => { fetchUnreadCount() }
       )
       .on(
         'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'internal_conversation_participants'
-        },
-        () => {
-          fetchUnreadCount()
-        }
+        { event: 'UPDATE', schema: 'public', table: 'internal_messages' },
+        () => { fetchUnreadCount() }
       )
       .subscribe()
 

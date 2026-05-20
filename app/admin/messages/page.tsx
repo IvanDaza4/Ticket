@@ -243,13 +243,13 @@ export default function MessagesPage() {
           .order('created_at', { ascending: false })
           .limit(1)
 
-        // Count unread
+        // Count unread — use is_read as sole source of truth
         const { count } = await supabase
           .from('internal_messages')
           .select('*', { count: 'exact', head: true })
           .eq('conversation_id', convId)
           .neq('sender_id', userId)
-          .gt('created_at', p.last_read_at || '1970-01-01')
+          .eq('is_read', false)
 
         return {
           id: convId,
@@ -293,16 +293,14 @@ export default function MessagesPage() {
       scrollToBottom()
     }
 
-    // Mark all unread messages as read
+    // Mark as read immediately — update local state first so the badge reacts instantly
     if (currentUserId) {
-      // Update last_read_at for this conversation
-      await supabase
-        .from('internal_conversation_participants')
-        .update({ last_read_at: new Date().toISOString() })
-        .eq('conversation_id', conversationId)
-        .eq('user_id', currentUserId)
+      // 1. Optimistic local update — zero out unread immediately
+      setConversations(prev =>
+        prev.map(c => c.id === conversationId ? { ...c, unread_count: 0 } : c)
+      )
 
-      // Mark messages from other users as read
+      // 2. Mark every unread message from other users as read in DB
       await supabase
         .from('internal_messages')
         .update({ is_read: true })
@@ -310,10 +308,12 @@ export default function MessagesPage() {
         .neq('sender_id', currentUserId)
         .eq('is_read', false)
 
-      // Update local unread count
-      setConversations(prev => 
-        prev.map(c => c.id === conversationId ? { ...c, unread_count: 0 } : c)
-      )
+      // 3. Update last_read_at so the participant record stays in sync
+      await supabase
+        .from('internal_conversation_participants')
+        .update({ last_read_at: new Date().toISOString() })
+        .eq('conversation_id', conversationId)
+        .eq('user_id', currentUserId)
     }
   }
 
