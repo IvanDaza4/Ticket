@@ -13,68 +13,41 @@ export function MessageBadge({ className }: MessageBadgeProps) {
   const supabase = createClient()
 
   useEffect(() => {
-    let userId: string | null = null
-    let subscription: any = null
+    let isMounted = true
 
-    async function fetchUnreadCount() {
+    async function init() {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user || !isMounted) return
 
-      userId = user.id
+      fetchUnreadCount(user.id)
+      const interval = setInterval(() => fetchUnreadCount(user.id), 10000)
 
-      // Get all participations with last_read_at
-      const { data: participations } = await supabase
-        .from('internal_conversation_participants')
-        .select('conversation_id, last_read_at')
-        .eq('user_id', user.id)
+      const channel = supabase
+        .channel(`unread-messages-${user.id}`) // ID único por usuario
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'internal_messages'
+        }, () => fetchUnreadCount(user.id))
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'internal_messages'
+        }, () => fetchUnreadCount(user.id))
+        .subscribe()
 
-      if (!participations || participations.length === 0) {
-        setUnreadCount(0)
-        return
+      return () => {
+        isMounted = false
+        clearInterval(interval)
+        supabase.removeChannel(channel)
       }
-
-      // Collect all conversation IDs for a single batch query
-      const convIds = participations.map(p => p.conversation_id)
-
-      const { count: total } = await supabase
-        .from('internal_messages')
-        .select('*', { count: 'exact', head: true })
-        .in('conversation_id', convIds)
-        .neq('sender_id', user.id)
-        .eq('is_read', false)
-
-      setUnreadCount(total || 0)
     }
 
-    fetchUnreadCount()
-
-    // Poll every 10 seconds to pick up read status changes
-    const interval = setInterval(fetchUnreadCount, 10000)
-
-    // Real-time: react to new messages AND to messages being marked as read
-    subscription = supabase
-      .channel('unread-messages')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'internal_messages' },
-        () => { fetchUnreadCount() }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'internal_messages' },
-        () => { fetchUnreadCount() }
-      )
-      .subscribe()
-
+    const cleanup = init()
     return () => {
-      clearInterval(interval)
-      if (subscription) {
-        supabase.removeChannel(subscription)
-      }
+      cleanup.then(fn => fn?.())
     }
-  }, [supabase])
-
-  if (unreadCount === 0) return null
+  }, [])
 
   return (
     <span className={cn(
