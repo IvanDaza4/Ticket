@@ -25,14 +25,7 @@ export function TicketFeedback({ ticketId, ticketNumber, onFeedbackSubmitted, on
 
   const supabase = createClient()
 
-  const ratingLabels = [
-    '',
-    'Muy insatisfecho',
-    'Insatisfecho',
-    'Neutral',
-    'Satisfecho',
-    'Muy satisfecho'
-  ]
+  const ratingLabels = ['', 'Muy insatisfecho', 'Insatisfecho', 'Neutral', 'Satisfecho', 'Muy satisfecho']
 
   const handleSubmit = async () => {
     if (rating === 0) {
@@ -53,13 +46,15 @@ export function TicketFeedback({ ticketId, ticketNumber, onFeedbackSubmitted, on
           ticket_id: ticketId,
           rating,
           comment: comment.trim() || null,
-          created_by: user.id
+          created_by: user.id,
         })
 
       if (insertError) {
+        // Unique constraint: ya existe feedback para este ticket
         if (insertError.code === '23505') {
-          setError('Ya has enviado feedback para este ticket')
+          setError('Ya enviaste feedback para este ticket')
         } else {
+          console.error('Feedback insert error:', insertError)
           throw insertError
         }
         return
@@ -82,7 +77,6 @@ export function TicketFeedback({ ticketId, ticketNumber, onFeedbackSubmitted, on
         .from('tickets')
         .update({ status: 'closed', closed_at: new Date().toISOString() })
         .eq('id', ticketId)
-
       if (error) throw error
       onClose?.()
     } catch (err) {
@@ -156,16 +150,16 @@ export function TicketFeedback({ ticketId, ticketNumber, onFeedbackSubmitted, on
                 onMouseLeave={() => setHoveredRating(0)}
                 disabled={loading}
                 className={cn(
-                  "p-1 transition-all duration-150 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50 rounded",
-                  loading && "opacity-50 cursor-not-allowed"
+                  'p-1 transition-all duration-150 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary/50 rounded',
+                  loading && 'opacity-50 cursor-not-allowed'
                 )}
               >
                 <Star
                   className={cn(
-                    "h-8 w-8 transition-colors duration-150",
+                    'h-8 w-8 transition-colors duration-150',
                     (hoveredRating || rating) >= value
-                      ? "fill-amber-400 text-amber-400"
-                      : "text-muted-foreground/30"
+                      ? 'fill-amber-400 text-amber-400'
+                      : 'text-muted-foreground/30'
                   )}
                 />
               </button>
@@ -191,7 +185,6 @@ export function TicketFeedback({ ticketId, ticketNumber, onFeedbackSubmitted, on
           />
         </div>
 
-        {/* Actions */}
         <div className="flex gap-2 pt-2">
           <Button
             onClick={handleSubmit}
@@ -199,10 +192,7 @@ export function TicketFeedback({ ticketId, ticketNumber, onFeedbackSubmitted, on
             className="flex-1"
           >
             {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Enviando...
-              </>
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Enviando...</>
             ) : (
               'Enviar Calificacion'
             )}

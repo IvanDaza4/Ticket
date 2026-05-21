@@ -9,22 +9,14 @@ import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
 import { ArrowLeft, Clock, User, Calendar, MessageSquare, Loader2, CheckCircle2, PartyPopper } from 'lucide-react'
 import {
-  TICKET_STATUS_LABELS,
-  TICKET_STATUS_COLORS,
-  TICKET_URGENCY_LABELS,
-  TICKET_URGENCY_COLORS,
-  TICKET_IMPACT_LABELS
+  TICKET_STATUS_LABELS, TICKET_STATUS_COLORS,
+  TICKET_URGENCY_LABELS, TICKET_URGENCY_COLORS, TICKET_IMPACT_LABELS,
 } from '@/lib/constants'
 import { TicketComments } from '@/components/tickets/ticket-comments'
 import { TicketFeedback } from '@/components/tickets/ticket-feedback'
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 
 interface TicketDetailClientProps {
@@ -92,12 +84,10 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
       .single()
 
     if (!error && data) {
-      // Check if status changed to resolved
       if (previousStatus && previousStatus !== 'resolved' && data.status === 'resolved') {
         setShowResolvedAlert(true)
         setShowFeedback(true)
       }
-      // Show feedback form if ticket is resolved and no feedback yet
       if (data.status === 'resolved' && !hasFeedback) {
         setShowFeedback(true)
       }
@@ -109,25 +99,20 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
   const fetchComments = useCallback(async () => {
     const { data } = await supabase
       .from('ticket_comments')
-      .select(`
-        *,
-        author:profiles(first_name, last_name, role, avatar_url)
-      `)
+      .select(`*, author:profiles(first_name, last_name, role, avatar_url)`)
       .eq('ticket_id', ticketId)
       .eq('is_internal', false)
       .order('created_at', { ascending: true })
-
-    if (data) {
-      setComments(data)
-    }
+    if (data) setComments(data)
   }, [ticketId, supabase])
 
   const checkExistingFeedback = useCallback(async () => {
+    // Check in ticket_feedback table
     const { data } = await supabase
       .from('ticket_feedback')
       .select('id')
       .eq('ticket_id', ticketId)
-      .single()
+      .maybeSingle()
 
     if (data) {
       setHasFeedback(true)
@@ -149,35 +134,28 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
       fetchTicket()
       fetchComments()
     }, 30000)
-
     return () => clearInterval(interval)
   }, [fetchTicket, fetchComments])
 
-  // Subscribe to real-time updates
+  // Realtime subscription
   useEffect(() => {
     const channel = supabase
       .channel(`ticket-${ticketId}`)
       .on(
         'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'tickets',
-          filter: `id=eq.${ticketId}`,
-        },
+        { event: 'UPDATE', schema: 'public', table: 'tickets', filter: `id=eq.${ticketId}` },
         (payload) => {
           const newData = payload.new as Ticket
           if (ticket && ticket.status !== 'resolved' && newData.status === 'resolved') {
             setShowResolvedAlert(true)
+            setShowFeedback(true)
           }
           setTicket(prev => prev ? { ...prev, ...newData } : null)
         }
       )
       .subscribe()
 
-    return () => {
-      supabase.removeChannel(channel)
-    }
+    return () => { supabase.removeChannel(channel) }
   }, [ticketId, ticket, supabase])
 
   if (loading) {
@@ -201,11 +179,9 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
     )
   }
 
-  // Calculate SLA status
   const now = new Date()
   const responseDeadline = ticket.sla_response_deadline ? new Date(ticket.sla_response_deadline) : null
   const resolutionDeadline = ticket.sla_resolution_deadline ? new Date(ticket.sla_resolution_deadline) : null
-
   const isResponseBreached = responseDeadline && !ticket.first_response_at && now > responseDeadline
   const isResolutionBreached = resolutionDeadline && !ticket.resolved_at && now > resolutionDeadline
 
@@ -241,9 +217,7 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start gap-4">
         <Button variant="ghost" size="icon" asChild className="self-start">
-          <Link href="/portal/tickets">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
+          <Link href="/portal/tickets"><ArrowLeft className="h-4 w-4" /></Link>
         </Button>
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -266,7 +240,7 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
       <div className="grid lg:grid-cols-3 gap-4 md:gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-4 md:space-y-6">
-          {/* Resolution Notes - Show prominently if resolved */}
+          {/* Resolution Notes */}
           {ticket.status === 'resolved' && ticket.resolution_notes && (
             <Card className="border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-900">
               <CardHeader className="pb-2">
@@ -283,7 +257,7 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
             </Card>
           )}
 
-          {/* Feedback Form - Show when ticket is resolved and no feedback yet */}
+          {/* Feedback Form */}
           {showFeedback && ticket.status === 'resolved' && !hasFeedback && (
             <TicketFeedback
               ticketId={ticket.id}
@@ -324,17 +298,13 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <TicketComments
-                ticketId={ticket.id}
-                comments={comments}
-              />
+              <TicketComments ticketId={ticket.id} comments={comments} />
             </CardContent>
           </Card>
         </div>
 
         {/* Sidebar */}
         <div className="space-y-4 md:space-y-6">
-          {/* Ticket Info */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Informacion</CardTitle>
@@ -380,7 +350,6 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
             </CardContent>
           </Card>
 
-          {/* People */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Personas</CardTitle>
@@ -396,9 +365,7 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
                     <p className="text-sm font-medium">
                       {ticket.creator?.first_name} {ticket.creator?.last_name}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      {ticket.creator?.email}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{ticket.creator?.email}</p>
                   </div>
                 </div>
               </div>
@@ -412,7 +379,7 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
                     </div>
                     <div>
                       <p className="text-sm font-medium">
-                        {ticket.assignee?.first_name} {ticket.assignee?.last_name}
+                        {ticket.assignee.first_name} {ticket.assignee.last_name}
                       </p>
                       <p className="text-xs text-muted-foreground">Tecnico de soporte</p>
                     </div>
@@ -424,7 +391,6 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
             </CardContent>
           </Card>
 
-          {/* SLA Info */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
@@ -471,7 +437,6 @@ export function TicketDetailClient({ ticketId }: TicketDetailClientProps) {
             </CardContent>
           </Card>
 
-          {/* Dates */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
