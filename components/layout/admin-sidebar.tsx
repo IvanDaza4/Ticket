@@ -169,7 +169,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   return (
     <>
       {/* Mobile Header Bar */}
-      <d{/* Logo */}
+      {/* Logo */}
       <div className={cn("flex items-center justify-center border-b border-sidebar-border py-4", isMobile && "px-4")}>
         <Link href="/admin" className="flex items-center gap-2">
           <Image
