@@ -20,7 +20,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import {
   Plus, Search, Monitor, Laptop, Server, Printer, Network, Smartphone, Package,
-  HardDrive, MapPin, Tag, Calendar, Hash, Building2, Wifi,
+  HardDrive, MapPin, Tag, Calendar, Hash, Building2, Wifi, Filter,
 } from 'lucide-react'
 import type { Asset, AssetType, AssetStatus, Organization } from '@/lib/types'
 
@@ -83,6 +83,7 @@ export default function AssetsPage() {
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [orgFilter, setOrgFilter] = useState<string>('all')
+  const [showFilters, setShowFilters] = useState(false)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
   const [isDetailOpen, setIsDetailOpen] = useState(false)
@@ -134,14 +135,17 @@ export default function AssetsPage() {
 
   const getOrgName = (orgId: string) => organizations.find(o => o.id === orgId)?.name || 'Sin asignar'
 
+  const activeFiltersCount = [typeFilter !== 'all', statusFilter !== 'all', orgFilter !== 'all'].filter(Boolean).length
+
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8 animate-fade-in">
-      <div className="flex items-center justify-between gap-4">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Activos</span>
           </h1>
-          <p className="text-muted-foreground text-sm md:text-base">Inventario de equipos y software (CMDB)</p>
+          <p className="text-sm text-muted-foreground">Inventario de equipos y software (CMDB)</p>
         </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
@@ -264,45 +268,84 @@ export default function AssetsPage() {
         </Card>
       </div>
 
-      {/* Filters + List */}
+      {/* Search + Filters card — no overflow */}
       <Card>
-        <CardHeader>
-          <div className="flex flex-col gap-3">
-            <div className="relative">
+        <CardHeader className="pb-3">
+          {/* Search row — full width, no overflow */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Buscar activos..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-9" />
+              <Input
+                placeholder="Buscar activos..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="pl-9 w-full"
+              />
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-[130px] shrink-0">
-                  <SelectValue placeholder="Tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los tipos</SelectItem>
-                  {(Object.keys(assetTypeLabels) as AssetType[]).map(t => <SelectItem key={t} value={t}>{assetTypeLabels[t]}</SelectItem>)}
-                </SelectContent>
-              </Select>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[130px] shrink-0">
-                  <SelectValue placeholder="Estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los estados</SelectItem>
-                  {(Object.keys(statusLabels) as AssetStatus[]).map(s => <SelectItem key={s} value={s}>{statusLabels[s]}</SelectItem>)}
-                </SelectContent>
-              </Select>
-              <Select value={orgFilter} onValueChange={setOrgFilter}>
-                <SelectTrigger className="w-[150px] shrink-0">
-                  <SelectValue placeholder="Organizacion" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas</SelectItem>
-                  {organizations.map(org => <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Filter toggle button for mobile */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0 relative"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-4 w-4" />
+              {activeFiltersCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
+                  {activeFiltersCount}
+                </span>
+              )}
+            </Button>
+          </div>
+
+          {/* Filters — stacked on mobile when toggled, always visible on desktop */}
+          <div className={`${showFilters ? 'flex' : 'hidden'} md:flex flex-col md:flex-row gap-2 mt-2`}>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-full md:w-[140px]">
+                <SelectValue placeholder="Tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los tipos</SelectItem>
+                {(Object.keys(assetTypeLabels) as AssetType[]).map(t => (
+                  <SelectItem key={t} value={t}>{assetTypeLabels[t]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full md:w-[150px]">
+                <SelectValue placeholder="Estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los estados</SelectItem>
+                {(Object.keys(statusLabels) as AssetStatus[]).map(s => (
+                  <SelectItem key={s} value={s}>{statusLabels[s]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={orgFilter} onValueChange={setOrgFilter}>
+              <SelectTrigger className="w-full md:w-[180px]">
+                <SelectValue placeholder="Organizacion" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                {organizations.map(org => (
+                  <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {activeFiltersCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground text-xs"
+                onClick={() => { setTypeFilter('all'); setStatusFilter('all'); setOrgFilter('all') }}
+              >
+                Limpiar filtros
+              </Button>
+            )}
           </div>
         </CardHeader>
+
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center py-8">
@@ -312,7 +355,9 @@ export default function AssetsPage() {
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <HardDrive className="h-12 w-12 text-muted-foreground/50" />
               <h3 className="mt-4 text-lg font-semibold">No hay activos</h3>
-              <p className="text-muted-foreground text-sm">{searchQuery ? 'No se encontraron resultados' : 'Registra tu primer activo para empezar'}</p>
+              <p className="text-muted-foreground text-sm">
+                {searchQuery || activeFiltersCount > 0 ? 'No se encontraron resultados' : 'Registra tu primer activo para empezar'}
+              </p>
             </div>
           ) : (
             <>
@@ -322,9 +367,9 @@ export default function AssetsPage() {
                   <button
                     key={asset.id}
                     onClick={() => { setSelectedAsset(asset); setIsDetailOpen(true) }}
-                    className="flex flex-col gap-3 p-4 rounded-xl border border-border/50 bg-card/50 hover:bg-muted/30 transition-colors text-left w-full"
+                    className="flex flex-col gap-2.5 p-3.5 rounded-xl border border-border/50 bg-card/50 hover:bg-muted/30 transition-colors text-left w-full"
                   >
-                    {/* Header */}
+                    {/* Header row */}
                     <div className="flex items-center gap-3">
                       <div className={`p-2 rounded-lg shrink-0 ${assetTypeBg[asset.asset_type]}`}>
                         {assetTypeIcons[asset.asset_type]}
@@ -332,7 +377,7 @@ export default function AssetsPage() {
                       <div className="min-w-0 flex-1">
                         <p className="font-semibold text-sm text-foreground truncate">{asset.name}</p>
                         {asset.manufacturer && asset.model && (
-                          <p className="text-xs text-muted-foreground">{asset.manufacturer} {asset.model}</p>
+                          <p className="text-xs text-muted-foreground truncate">{asset.manufacturer} {asset.model}</p>
                         )}
                       </div>
                       <Badge variant="outline" className={`text-xs shrink-0 ${statusColors[asset.status]}`}>
@@ -340,33 +385,33 @@ export default function AssetsPage() {
                       </Badge>
                     </div>
 
-                    {/* Details */}
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                    {/* Info grid */}
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground pl-1">
+                      <span className="flex items-center gap-1.5 truncate">
                         <Building2 className="h-3 w-3 shrink-0" />
                         <span className="truncate">{getOrgName(asset.organization_id)}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                      </span>
+                      <span className="flex items-center gap-1.5">
                         <Tag className="h-3 w-3 shrink-0" />
-                        <span>{assetTypeLabels[asset.asset_type]}</span>
-                      </div>
+                        {assetTypeLabels[asset.asset_type]}
+                      </span>
                       {asset.location && (
-                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <span className="flex items-center gap-1.5 truncate">
                           <MapPin className="h-3 w-3 shrink-0" />
                           <span className="truncate">{asset.location}</span>
-                        </div>
+                        </span>
                       )}
                       {asset.ip_address && (
-                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <span className="flex items-center gap-1.5">
                           <Wifi className="h-3 w-3 shrink-0" />
-                          <span className="font-mono">{asset.ip_address}</span>
-                        </div>
+                          <span className="font-mono truncate">{asset.ip_address}</span>
+                        </span>
                       )}
                       {asset.serial_number && (
-                        <div className="flex items-center gap-1.5 text-muted-foreground col-span-2">
+                        <span className="flex items-center gap-1.5 col-span-2">
                           <Hash className="h-3 w-3 shrink-0" />
                           <span className="font-mono">{asset.serial_number}</span>
-                        </div>
+                        </span>
                       )}
                     </div>
                   </button>
