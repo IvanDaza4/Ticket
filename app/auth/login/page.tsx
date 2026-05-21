@@ -3,13 +3,14 @@
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, Headset } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 
 function LoginForm() {
   const [email, setEmail] = useState('')
@@ -61,10 +62,13 @@ function LoginForm() {
       <CardHeader className="space-y-1 text-center">
         <div className="flex justify-center mb-4">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="bg-gradient-to-br from-primary to-primary/70 p-2 rounded-lg shadow-lg shadow-primary/20 transition-transform duration-200 group-hover:scale-105">
-              <Headset className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-2xl font-bold text-foreground">Ingnala</span>
+            <Image 
+              src="/Logo_Nova.png" 
+              alt="Nova Logo" 
+              width={50} 
+              height={50}
+              className="h-12 w-12 object-contain transition-transform duration-200 group-hover:scale-105"
+            />
           </Link>
         </div>
         <CardTitle className="text-2xl">Iniciar Sesion</CardTitle>

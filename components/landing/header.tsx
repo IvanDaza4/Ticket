@@ -1,16 +1,21 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Headset } from 'lucide-react'
+import Image from 'next/image'
 
 export function LandingHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="bg-gradient-to-br from-primary to-primary/70 p-2 rounded-lg shadow-lg shadow-primary/20 transition-transform duration-200 group-hover:scale-105">
-            <Headset className="h-5 w-5 text-primary-foreground" />
+          <div className="transition-transform duration-200 group-hover:scale-105">
+            <Image 
+              src="/Logo_Nova.png" 
+              alt="Nova Logo" 
+              width={40} 
+              height={40}
+              className="h-10 w-10 object-contain"
+            />
           </div>
-          <span className="text-xl font-bold text-foreground">Ingnala</span>
         </Link>
         
         <nav className="hidden md:flex items-center gap-6">

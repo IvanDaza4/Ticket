@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { 
@@ -10,7 +11,6 @@ import {
   Brain, 
   User, 
   LogOut,
-  Headset,
   ChevronLeft,
   ChevronRight,
   Settings,
@@ -57,6 +57,22 @@ export function PortalSidebar({ user }: PortalSidebarProps) {
 
   const NavContent = ({ isMobile = false }: { isMobile?: boolean }) => (
     <>
+      {/* Logo */}
+      <div className={cn("flex items-center justify-center border-b border-sidebar-border py-4", isMobile && "px-4")}>
+        <Link href="/portal" className="flex items-center gap-2">
+          <Image 
+            src="/Logo_Nova.png" 
+            alt="Nova Logo" 
+            width={40} 
+            height={40}
+            className="h-10 w-10 object-contain"
+          />
+          {(isMobile || !collapsed) && (
+            <span className="text-sm font-bold text-sidebar-foreground"></span>
+          )}
+        </Link>
+      </div>
+
       <nav className={cn("flex-1 px-2 py-4 space-y-1", isMobile && "px-4")}>
         {navigation.map((item, index) => {
           const isActive = pathname === item.href || 

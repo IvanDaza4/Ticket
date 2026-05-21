@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useId } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
@@ -10,25 +10,26 @@ interface MessageBadgeProps {
 
 export function MessageBadge({ className }: MessageBadgeProps) {
   const [unreadCount, setUnreadCount] = useState(0)
+  const uniqueId = useId()
   const supabase = createClient()
 
   useEffect(() => {
-    let userId: string | null = null
-    let subscription: any = null
+    let isMounted = true
+    let subscription: ReturnType<typeof supabase.channel> | null = null
 
     async function fetchUnreadCount() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-      
-      userId = user.id
+      if (!isMounted) return
 
-      // Get all participations with last_read_at
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user || !isMounted) return
+
+      // Get all participations
       const { data: participations } = await supabase
         .from('internal_conversation_participants')
-        .select('conversation_id, last_read_at')
+        .select('conversation_id')
         .eq('user_id', user.id)
 
-      if (!participations || participations.length === 0) {
+      if (!participations || participations.length === 0 || !isMounted) {
         setUnreadCount(0)
         return
       }
@@ -43,7 +44,9 @@ export function MessageBadge({ className }: MessageBadgeProps) {
         .neq('sender_id', user.id)
         .eq('is_read', false)
 
-      setUnreadCount(total || 0)
+      if (isMounted) {
+        setUnreadCount(total || 0)
+      }
     }
 
     fetchUnreadCount()
@@ -52,8 +55,10 @@ export function MessageBadge({ className }: MessageBadgeProps) {
     const interval = setInterval(fetchUnreadCount, 10000)
 
     // Real-time: react to new messages AND to messages being marked as read
+    // Use a unique channel name per component instance to avoid conflicts
+    const channelName = `unread-messages-${uniqueId.replace(/:/g, '-')}`
     subscription = supabase
-      .channel('unread-messages')
+      .channel(channelName)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'internal_messages' },
@@ -64,15 +69,17 @@ export function MessageBadge({ className }: MessageBadgeProps) {
         { event: 'UPDATE', schema: 'public', table: 'internal_messages' },
         () => { fetchUnreadCount() }
       )
-      .subscribe()
+
+    subscription.subscribe()
 
     return () => {
+      isMounted = false
       clearInterval(interval)
       if (subscription) {
         supabase.removeChannel(subscription)
       }
     }
-  }, [supabase])
+  }, [supabase, uniqueId])
 
   if (unreadCount === 0) return null
 

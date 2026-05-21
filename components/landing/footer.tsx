@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Headset } from 'lucide-react'
+import Image from 'next/image'
 
 export function LandingFooter() {
   return (
@@ -8,10 +8,13 @@ export function LandingFooter() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div>
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="bg-sidebar-primary p-2 rounded-lg">
-                <Headset className="h-5 w-5 text-sidebar-primary-foreground" />
-              </div>
-              <span className="text-xl font-bold">Ingnala</span>
+              <Image 
+                src="/Logo_Nova.png" 
+                alt="Nova Logo" 
+                width={40} 
+                height={40}
+                className="h-10 w-10 object-contain"
+              />
             </Link>
             <p className="text-sm text-sidebar-foreground/70">
               Soporte IT profesional para pequeñas y medianas empresas. Tu tranquilidad tecnológica.
