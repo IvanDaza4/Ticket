@@ -220,46 +220,42 @@ export default function ClientsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Clientes
-            </CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+      <div className="grid grid-cols-2 gap-3 md:gap-4 md:grid-cols-4">
+        <Card className="py-3 md:py-6 gap-2 md:gap-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 px-3 md:px-6">
+            <CardTitle className="text-xs md:text-sm font-medium">Total Clientes</CardTitle>
+            <Building2 className="h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.active} activos
-            </p>
+          <CardContent className="px-3 md:px-6">
+            <div className="text-xl md:text-2xl font-bold">{stats.total}</div>
+            <p className="text-xs text-muted-foreground">{stats.active} activos</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Plan Bronze</CardTitle>
-            <FileText className="h-4 w-4 text-amber-600" />
+        <Card className="py-3 md:py-6 gap-2 md:gap-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 px-3 md:px-6">
+            <CardTitle className="text-xs md:text-sm font-medium">Plan Bronze</CardTitle>
+            <FileText className="h-3.5 w-3.5 md:h-4 md:w-4 text-amber-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.byPlan.bronze}</div>
+          <CardContent className="px-3 md:px-6">
+            <div className="text-xl md:text-2xl font-bold">{stats.byPlan.bronze}</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Plan Silver</CardTitle>
-            <FileText className="h-4 w-4 text-slate-600" />
+        <Card className="py-3 md:py-6 gap-2 md:gap-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 px-3 md:px-6">
+            <CardTitle className="text-xs md:text-sm font-medium">Plan Silver</CardTitle>
+            <FileText className="h-3.5 w-3.5 md:h-4 md:w-4 text-slate-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.byPlan.silver}</div>
+          <CardContent className="px-3 md:px-6">
+            <div className="text-xl md:text-2xl font-bold">{stats.byPlan.silver}</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Plan Gold</CardTitle>
-            <FileText className="h-4 w-4 text-yellow-600" />
+        <Card className="py-3 md:py-6 gap-2 md:gap-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 px-3 md:px-6">
+            <CardTitle className="text-xs md:text-sm font-medium">Plan Gold</CardTitle>
+            <FileText className="h-3.5 w-3.5 md:h-4 md:w-4 text-yellow-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.byPlan.gold}</div>
+          <CardContent className="px-3 md:px-6">
+            <div className="text-xl md:text-2xl font-bold">{stats.byPlan.gold}</div>
           </CardContent>
         </Card>
       </div>

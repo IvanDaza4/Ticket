@@ -334,27 +334,25 @@ export default function ReportsPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Tickets</CardTitle>
-            <Ticket className="h-4 w-4 text-muted-foreground" />
+      <div className="grid grid-cols-2 gap-3 md:gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="py-3 md:py-6 gap-2 md:gap-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 px-3 md:px-6">
+            <CardTitle className="text-xs md:text-sm font-medium">Total Tickets</CardTitle>
+            <Ticket className="h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalTickets || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats?.openTickets || 0} abiertos actualmente
-            </p>
+          <CardContent className="px-3 md:px-6">
+            <div className="text-xl md:text-2xl font-bold">{stats?.totalTickets || 0}</div>
+            <p className="text-xs text-muted-foreground">{stats?.openTickets || 0} abiertos</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Resueltos Hoy</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+        <Card className="py-3 md:py-6 gap-2 md:gap-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 px-3 md:px-6">
+            <CardTitle className="text-xs md:text-sm font-medium">Resueltos Hoy</CardTitle>
+            <CheckCircle className="h-3.5 w-3.5 md:h-4 md:w-4 text-green-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.resolvedToday || 0}</div>
+          <CardContent className="px-3 md:px-6">
+            <div className="text-xl md:text-2xl font-bold">{stats?.resolvedToday || 0}</div>
             <div className="flex items-center text-xs text-green-600">
               <TrendingUp className="mr-1 h-3 w-3" />
               Productividad del dia
@@ -362,28 +360,24 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tiempo Promedio</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+        <Card className="py-3 md:py-6 gap-2 md:gap-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 px-3 md:px-6">
+            <CardTitle className="text-xs md:text-sm font-medium">Tiempo Promedio</CardTitle>
+            <Clock className="h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {stats?.avgResolutionTime || 0}h
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Tiempo de resolucion promedio
-            </p>
+          <CardContent className="px-3 md:px-6">
+            <div className="text-xl md:text-2xl font-bold">{stats?.avgResolutionTime || 0}h</div>
+            <p className="text-xs text-muted-foreground">Tiempo promedio</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Cumplimiento SLA</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
+        <Card className="py-3 md:py-6 gap-2 md:gap-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 px-3 md:px-6">
+            <CardTitle className="text-xs md:text-sm font-medium">Cumplimiento SLA</CardTitle>
+            <Target className="h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.slaCompliance || 0}%</div>
+          <CardContent className="px-3 md:px-6">
+            <div className="text-xl md:text-2xl font-bold">{stats?.slaCompliance || 0}%</div>
             <div
               className={`flex items-center text-xs ${(stats?.slaCompliance || 0) >= 90
                 ? 'text-green-600'
@@ -404,24 +398,22 @@ export default function ReportsPage() {
       </div>
 
       {/* Second row of KPIs */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">CSAT Promedio</CardTitle>
-            <Star className="h-4 w-4 text-yellow-500" />
+      <div className="grid grid-cols-2 gap-3 md:gap-4">
+        <Card className="py-3 md:py-6 gap-2 md:gap-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 px-3 md:px-6">
+            <CardTitle className="text-xs md:text-sm font-medium">CSAT Promedio</CardTitle>
+            <Star className="h-3.5 w-3.5 md:h-4 md:w-4 text-yellow-500" />
           </CardHeader>
-          <CardContent>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold">
-                {stats?.csatAverage || 0}
-              </span>
+          <CardContent className="px-3 md:px-6">
+            <div className="flex items-baseline gap-1 md:gap-2">
+              <span className="text-xl md:text-2xl font-bold">{stats?.csatAverage || 0}</span>
               <span className="text-sm text-muted-foreground">/ 5</span>
             </div>
-            <div className="mt-2 flex gap-1">
+            <div className="mt-1 md:mt-2 flex gap-0.5 md:gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <Star
                   key={star}
-                  className={`h-4 w-4 ${star <= (stats?.csatAverage || 0)
+                  className={`h-3 w-3 md:h-4 md:w-4 ${star <= (stats?.csatAverage || 0)
                     ? 'fill-yellow-500 text-yellow-500'
                     : 'text-gray-300'
                     }`}
@@ -431,20 +423,16 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Tickets en Riesgo SLA
-            </CardTitle>
-            <AlertTriangle className="h-4 w-4 text-yellow-500" />
+        <Card className="py-3 md:py-6 gap-2 md:gap-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 md:pb-2 px-3 md:px-6">
+            <CardTitle className="text-xs md:text-sm font-medium">Riesgo SLA</CardTitle>
+            <AlertTriangle className="h-3.5 w-3.5 md:h-4 md:w-4 text-yellow-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="px-3 md:px-6">
+            <div className="text-xl md:text-2xl font-bold">
               {100 - (stats?.slaCompliance || 100)}%
             </div>
-            <p className="text-xs text-muted-foreground">
-              Porcentaje de tickets con SLA incumplido
-            </p>
+            <p className="text-xs text-muted-foreground">tickets con SLA incumplido</p>
           </CardContent>
         </Card>
       </div>
