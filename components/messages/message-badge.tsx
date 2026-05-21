@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
@@ -10,17 +10,16 @@ interface MessageBadgeProps {
 
 export function MessageBadge({ className }: MessageBadgeProps) {
   const [unreadCount, setUnreadCount] = useState(0)
+  // Track channel ref so cleanup always removes the right one
+  const channelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
 
   useEffect(() => {
     const supabase = createClient()
     let isMounted = true
     let intervalId: ReturnType<typeof setInterval> | null = null
-    let channel: ReturnType<typeof supabase.channel> | null = null
 
-    // fetchUnreadCount defined INSIDE useEffect so it's always in scope
     async function fetchUnreadCount(userId: string) {
       if (!isMounted) return
-
       try {
         const { data: participations } = await supabase
           .from('internal_conversation_participants')
@@ -33,7 +32,6 @@ export function MessageBadge({ className }: MessageBadgeProps) {
         }
 
         const convIds = participations.map(p => p.conversation_id)
-
         const { count } = await supabase
           .from('internal_messages')
           .select('*', { count: 'exact', head: true })
@@ -43,7 +41,7 @@ export function MessageBadge({ className }: MessageBadgeProps) {
 
         if (isMounted) setUnreadCount(count || 0)
       } catch {
-        // silently ignore — badge is non-critical
+        // non-critical, ignore silently
       }
     }
 
@@ -52,16 +50,23 @@ export function MessageBadge({ className }: MessageBadgeProps) {
       if (!user || !isMounted) return
 
       const userId = user.id
+      const channelName = `unread-${userId}-${Date.now()}` // unique per mount
+
+      // Remove any previous channel from this component instance
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
 
       // Initial fetch
       await fetchUnreadCount(userId)
 
-      // Poll every 10s
-      intervalId = setInterval(() => fetchUnreadCount(userId), 10000)
+      // Polling fallback
+      intervalId = setInterval(() => fetchUnreadCount(userId), 15000)
 
-      // Realtime subscription — build channel BEFORE subscribe, chain both .on() calls
-      channel = supabase
-        .channel(`unread-messages-${userId}`)
+      // Build channel — chain ALL .on() BEFORE .subscribe()
+      const channel = supabase
+        .channel(channelName)
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'internal_messages' },
@@ -72,7 +77,9 @@ export function MessageBadge({ className }: MessageBadgeProps) {
           { event: 'UPDATE', schema: 'public', table: 'internal_messages' },
           () => fetchUnreadCount(userId)
         )
-        .subscribe()
+
+      channelRef.current = channel
+      channel.subscribe()
     }
 
     init()
@@ -80,9 +87,13 @@ export function MessageBadge({ className }: MessageBadgeProps) {
     return () => {
       isMounted = false
       if (intervalId) clearInterval(intervalId)
-      if (channel) supabase.removeChannel(channel)
+      if (channelRef.current) {
+        const supabaseCleanup = createClient()
+        supabaseCleanup.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
     }
-  }, []) // empty deps — runs once on mount
+  }, [])
 
   if (unreadCount === 0) return null
 
