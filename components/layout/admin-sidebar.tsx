@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
 import {
   LayoutDashboard,
   Inbox,
@@ -14,7 +15,6 @@ import {
   Monitor,
   BarChart3,
   LogOut,
-  Headset,
   ChevronLeft,
   ChevronRight,
   User,
@@ -169,47 +169,22 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   return (
     <>
       {/* Mobile Header Bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-sidebar/95 backdrop-blur-md border-b border-sidebar-border flex items-center justify-between px-4 z-40">
-        <Link href="/admin" className="flex items-center gap-2 group">
-          <div className="bg-gradient-to-br from-primary to-primary/70 p-1.5 rounded-lg shadow-lg shadow-primary/20 transition-transform duration-200 group-hover:scale-105">
-            <Headset className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-semibold text-sidebar-foreground">NOVA</span>
+      <d{/* Logo */}
+      <div className={cn("flex items-center justify-center border-b border-sidebar-border py-4", isMobile && "px-4")}>
+        <Link href="/admin" className="flex items-center gap-2">
+          <Image
+            src="/Logo_Nova.png"
+            alt="Nova Logo"
+            width={40}
+            height={40}
+            className="h-10 w-10 object-contain"
+          />
+          {(isMobile || !collapsed) && (
+            <span className="text-sm font-bold text-sidebar-foreground"></span>
+          )}
         </Link>
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-sidebar-foreground hover:bg-sidebar-accent/50"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-72 p-0 bg-sidebar/95 backdrop-blur-md border-sidebar-border">
-            <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
-            <div className="flex flex-col h-full">
-              <div className="flex items-center h-14 px-4 border-b border-sidebar-border">
-                <Link href="/admin" className="flex items-center gap-2">
-                  <div className="bg-gradient-to-br from-primary to-primary/70 p-1.5 rounded-lg shadow-lg shadow-primary/20">
-                    <Headset className="h-5 w-5 text-primary-foreground" />
-                  </div>
-                  <span className="text-lg font-semibold text-sidebar-foreground">NOVA</span>
-                </Link>
-              </div>
-              <AdminNavContent
-                isMobile
-                navigation={navigation}
-                pathname={pathname}
-                collapsed={collapsed}
-                setMobileOpen={setMobileOpen}
-                user={user}
-                handleLogout={handleLogout}
-              />
-            </div>
-          </SheetContent>
-        </Sheet>
       </div>
+
 
       {/* Desktop Sidebar */}
       <aside
@@ -218,23 +193,19 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
           collapsed ? 'w-16' : 'w-64'
         )}
       >
-        <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
-          <Link href="/admin" className="flex items-center gap-2 group">
-            <div className="bg-gradient-to-br from-primary to-primary/70 p-1.5 rounded-lg shadow-lg shadow-primary/20 transition-transform duration-200 group-hover:scale-105">
-              <Headset className="h-5 w-5 text-primary-foreground" />
-            </div>
-            {!collapsed && (
-              <span className="text-lg font-semibold text-sidebar-foreground">NOVA</span>
+        <div className={cn("flex items-center justify-center border-b border-sidebar-border py-4", isMobile && "px-4")}>
+          <Link href="/admin" className="flex items-center gap-2">
+            <Image
+              src="/Logo_Nova.png"
+              alt="Nova Logo"
+              width={40}
+              height={40}
+              className="h-10 w-10 object-contain"
+            />
+            {(isMobile || !collapsed) && (
+              <span className="text-sm font-bold text-sidebar-foreground"></span>
             )}
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200"
-            onClick={() => setCollapsed(!collapsed)}
-          >
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          </Button>
         </div>
         <AdminNavContent
           navigation={navigation}

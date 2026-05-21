@@ -1,7 +1,9 @@
 import Link from 'next/link'
+import Image from 'next/image'
+
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { XCircle, Headset } from 'lucide-react'
+import { XCircle } from 'lucide-react'
 
 export default function AuthErrorPage() {
   return (
@@ -9,12 +11,13 @@ export default function AuthErrorPage() {
       <Card className="w-full max-w-md text-center">
         <CardHeader className="space-y-1">
           <div className="flex justify-center mb-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-blue-600 p-2 rounded-lg">
-                <Headset className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-slate-900">Ingnala</span>
-            </div>
+            <Image
+              src="/Logo_Nova.png"
+              alt="Nova Logo"
+              width={50}
+              height={50}
+              className="h-12 w-12 object-contain"
+            />
           </div>
           <div className="flex justify-center mb-4">
             <div className="bg-red-100 p-4 rounded-full">
